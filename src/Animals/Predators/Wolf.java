@@ -5,7 +5,7 @@ import Util.Eatable;
 import java.util.Map;
 
 public class Wolf extends Animal {
-
+    public static Integer maxEmountInOneCell = 30;
     public Wolf() {
         weight = 50D;
         maxCellsByMove = 3;
