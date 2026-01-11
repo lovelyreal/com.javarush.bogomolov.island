@@ -5,8 +5,10 @@ import Util.Eatable;
 import java.util.Map;
 
 public class Wolf extends Animal {
-    public static Integer maxEmountInOneCell = 30;
-    public Wolf() {
+    public static int maxEmountInOneCell = 30;
+    public Wolf(int x, int y) {
+        this.x = x;
+        this.y = y;
         weight = 50D;
         maxCellsByMove = 3;
         killosOfMealToSatisfaction = 8;
@@ -25,5 +27,10 @@ public class Wolf extends Animal {
 
     public boolean canEat(Class<? extends Eatable> meal) {
         return diet.containsKey(meal);
+    }
+
+    @Override
+    public String toString() {
+        return "\uD83D\uDC3A";
     }
 }
