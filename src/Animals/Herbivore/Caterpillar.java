@@ -6,6 +6,7 @@ import Util.Plant;
 import java.util.Map;
 
 public class Caterpillar extends Animal {
+    public static Integer maxEmountInOneCell = 1000;
     public Caterpillar() {
         weight = 0.01D;
         maxCellsByMove = 0;

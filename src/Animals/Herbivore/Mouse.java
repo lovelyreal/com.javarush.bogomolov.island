@@ -6,6 +6,7 @@ import Util.Plant;
 import java.util.Map;
 
 public class Mouse extends Animal {
+    public static Integer maxEmountInOneCell = 500;
     public Mouse() {
         weight = 0.05D;
         maxCellsByMove = 1;

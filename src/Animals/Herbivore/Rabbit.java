@@ -6,6 +6,7 @@ import Util.Plant;
 import java.util.Map;
 
 public class Rabbit extends Animal {
+    public static Integer maxEmountInOneCell = 150;
     public Rabbit() {
         weight = 2D;
         maxCellsByMove = 2;

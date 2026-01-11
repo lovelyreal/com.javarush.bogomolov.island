@@ -21,9 +21,9 @@ public class Island {
 
     public void createNewIsland(){
         for (int i = 0; i < 100; i++) {
-            locations[i] = new Location();
             for (int j = 0; j < 20; j++) {
-                locations[i].animals[j] =
+                locations[i][j] = new Location();
+                locations[i][j].generateAnimals();
             }
         }
     }
