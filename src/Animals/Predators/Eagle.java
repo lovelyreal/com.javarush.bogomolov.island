@@ -6,8 +6,10 @@ import Util.Animal;
 import java.util.Map;
 
 public class Eagle extends Animal {
-    public static Integer maxEmountInOneCell = 20;
-    public Eagle() {
+    public static int maxAmountInOneCell = 20;
+    public Eagle(int x, int y) {
+        this.x = x;
+        this.y = y;
         weight = 6D;
         maxCellsByMove = 3;
         killosOfMealToSatisfaction = 1;
@@ -17,5 +19,8 @@ public class Eagle extends Animal {
                 Mouse.class, 90,
                 Duck.class, 80
         );
+    }
+    public String toString() {
+        return "\uD83E\uDD85";
     }
 }

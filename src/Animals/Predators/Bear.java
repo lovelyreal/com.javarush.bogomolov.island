@@ -6,8 +6,10 @@ import Util.Animal;
 import java.util.Map;
 
 public class Bear extends Animal {
-    public static Integer maxEmountInOneCell = 5;
-    public Bear() {
+    public static int maxAmountInOneCell = 5;
+    public Bear(int x, int y) {
+        this.x = x;
+        this.y = y;
         weight = 500D;
         maxCellsByMove = 2;
         killosOfMealToSatisfaction = 80;
@@ -25,5 +27,8 @@ public class Bear extends Animal {
 
 
         );
+    }
+    public String toString() {
+        return "\uD83D\uDC3B";
     }
 }

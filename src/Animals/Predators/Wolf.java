@@ -5,7 +5,7 @@ import Util.Eatable;
 import java.util.Map;
 
 public class Wolf extends Animal {
-    public static int maxEmountInOneCell = 30;
+    public static int maxAmountInOneCell = 30;
     public Wolf(int x, int y) {
         this.x = x;
         this.y = y;
@@ -31,6 +31,6 @@ public class Wolf extends Animal {
 
     @Override
     public String toString() {
-        return "\uD83D\uDC3A";
+        return "\uD83D\uDC3A"+ '\n' + "x -> " + x + '\n' + "y -> " + y;
     }
 }

@@ -6,7 +6,7 @@ import Util.Animal;
 import java.util.Map;
 
 public class Fox extends Animal {
-    public static int maxEmountInOneCell = 30;
+    public static int maxAmountInOneCell = 30;
     public Fox(int x, int y) {
         this.x = x;
         this.y = y;
