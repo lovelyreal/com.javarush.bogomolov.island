@@ -1,23 +1,23 @@
-package Animals.Herbivore;
+package Entities.Animals.Herbivore;
 
-import Util.Animal;
-import Util.Plant;
+import Entities.Animal;
+import Entities.Plant;
 
 import java.util.Map;
 
-public class Horse extends Animal {
+public class Deer extends Animal {
     public static int maxAmountInOneCell = 20;
-    public Horse(int x, int y) {
+    public Deer(int x, int y) {
         this.x = x;
         this.y = y;
-        weight = 400D;
+        weight = 300D;
         maxCellsByMove = 4;
-        killosOfMealToSatisfaction = 60;
+        killosOfMealToSatisfaction = 50;
         diet = Map.of(
                 Plant.class, 100
         );
     }
     public String toString() {
-        return "\uD83D\uDC34";
+        return "\uD83E\uDD8C";
     }
 }

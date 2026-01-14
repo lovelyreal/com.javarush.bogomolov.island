@@ -1,7 +1,10 @@
-package Animals.Predators;
+package Entities.Animals.Predators;
 
-import Animals.Herbivore.*;
-import Util.Animal;
+import Entities.Animal;
+import Entities.Animals.Herbivore.Caterpillar;
+import Entities.Animals.Herbivore.Duck;
+import Entities.Animals.Herbivore.Mouse;
+import Entities.Animals.Herbivore.Rabbit;
 
 import java.util.Map;
 

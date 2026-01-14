@@ -1,7 +1,7 @@
-package Animals.Herbivore;
+package Entities.Animals.Herbivore;
 
-import Util.Animal;
-import Util.Plant;
+import Entities.Animal;
+import Entities.Plant;
 
 import java.util.Map;
 

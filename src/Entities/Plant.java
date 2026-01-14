@@ -1,8 +1,6 @@
-package Util;
+package Entities;
 
-import Animals.Herbivore.*;
-
-import java.util.Map;
+import Util.Eatable;
 
 public class Plant implements Eatable {
     private int x;
@@ -17,6 +15,6 @@ public class Plant implements Eatable {
 
     @Override
     public String toString() {
-        return "\uD83C\uDF3F" + '\n' + "x -> " + x + '\n' + "y -> " + y;
+        return "\uD83C\uDF3F";
     }
 }

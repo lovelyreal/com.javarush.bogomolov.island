@@ -1,14 +1,21 @@
-package Animals.Predators;
-import Animals.Herbivore.*;
-import Util.Animal;
+package Entities.Animals.Predators;
+
+import Entities.Animal;
+import Entities.Animals.Herbivore.*;
 import Util.Eatable;
+import Util.Randomizer;
+import service.Island;
+
+import java.nio.file.DirectoryStream;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Wolf extends Animal {
     public static int maxAmountInOneCell = 30;
     public Wolf(int x, int y) {
         this.x = x;
         this.y = y;
+
         weight = 50D;
         maxCellsByMove = 3;
         killosOfMealToSatisfaction = 8;
@@ -31,6 +38,19 @@ public class Wolf extends Animal {
 
     @Override
     public String toString() {
-        return "\uD83D\uDC3A"+ '\n' + "x -> " + x + '\n' + "y -> " + y;
+        return "\uD83D\uDC3A";
     }
+
+
+
+
+    public void  breed() {
+
+    }
+
+
+    public void eat(Eatable meal) {
+
+    }
+
 }
