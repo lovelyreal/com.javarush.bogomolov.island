@@ -11,8 +11,8 @@ public abstract class Animal implements Eatable {
     protected int maxAmountInOneCell;
 
     protected ReentrantLock reentrantLock = new ReentrantLock(true);
-    protected static Integer x;
-    protected static Integer y;
+    protected Integer x;
+    protected Integer y;
     protected double weight;
     protected Integer maxCellsByMove;
     protected double killosOfMealToSatisfaction;
@@ -53,7 +53,7 @@ public abstract class Animal implements Eatable {
     }
 
 
- public Integer getMaxCellsByMove() {
+    public Integer getMaxCellsByMove() {
         return maxCellsByMove;
     }
 
@@ -61,26 +61,40 @@ public abstract class Animal implements Eatable {
     public void move() {
         try {
             if (reentrantLock.tryLock(100, TimeUnit.MILLISECONDS)) {
-                int steps = Randomizer.generateNum(maxCellsByMove);
-                Direction direction = Direction.random();
-                int newX = x + direction.dx * steps;
-                int newY = y + direction.dy * steps;
+
                 try {
-                    if (Island.isValidPosition(newX, newY, this.getClass())) {
-                        Eatable newAnimal = AnimalFactory.getNewAnimal(newX, newY, this);
-                        Island.addAnimal(newX, newY, newAnimal);
-                        Island.removeAnimal(x, y, this);
+                    if(maxCellsByMove != 0)
+                    {
+                        int steps = Randomizer.generateNum(maxCellsByMove);
+                        Direction direction = Direction.random();
+                        int newX = x + direction.dx * steps;
+                        int newY = y + direction.dy * steps;
+
+                        if (Island.isValidPosition(newX, newY, this.getClass())) {
+                            this.x = newX;
+                            this.y = newY;
+                        }
                     }
                 } catch (NoSuchFieldException | IllegalAccessException e) {
-                    System.out.println("Ошибка при проверке позиции");
+                    System.out.println("Ошибка при проверке позиции: " + e.getMessage());
+                } finally {
+                    reentrantLock.unlock();
                 }
-
+            } else {
+                System.out.println("Не удалось заблокировать животное для перемещения");
             }
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
-            reentrantLock.unlock();
+            Thread.currentThread().interrupt();
+            System.out.println("Поток прерван: " + e.getMessage());
         }
+    }
+
+    public Integer getX() {
+        return x;
+    }
+
+    public Integer getY() {
+        return y;
     }
 }
 

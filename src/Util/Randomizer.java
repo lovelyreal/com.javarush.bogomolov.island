@@ -6,11 +6,11 @@ public class Randomizer {
 
         public static int generateNum ( int bound){
             int result = 0;
-        try{
+//        try{
             result = rand.nextInt(bound);
-        } catch (RuntimeException e) {
-            System.out.println(bound);
-        }
+//        } catch (RuntimeException e) {
+//            System.out.println(bound);
+//        }
         return result;
     }
 }
