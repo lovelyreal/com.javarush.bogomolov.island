@@ -1,15 +1,15 @@
-package Entities.Animals.Herbivore;
+package entity.animal.herbivore;
 
-import Entities.Animal;
-import Entities.Plant;
+import entity.Animal;
+import entity.Plant;
 
 import java.util.Map;
 
 public class Caterpillar extends Animal {
     public static int maxAmountInOneCell = 1000;
     public Caterpillar(int x, int y) {
-        this.x = x;
-        this.y = y;
+        this.mapPositionX = x;
+        this.mapPositionY = y;
         weight = 0.01D;
         maxCellsByMove = 0;
         killosOfMealToSatisfaction = 0;

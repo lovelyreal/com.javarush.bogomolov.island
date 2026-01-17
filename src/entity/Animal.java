@@ -1,6 +1,6 @@
-package Entities;
+package entity;
 
-import Util.*;
+import util.*;
 import service.Island;
 
 import java.util.Map;
@@ -11,8 +11,8 @@ public abstract class Animal implements Eatable {
     protected int maxAmountInOneCell;
 
     protected ReentrantLock reentrantLock = new ReentrantLock(true);
-    protected Integer x;
-    protected Integer y;
+    protected Integer mapPositionX;
+    protected Integer mapPositionY;
     protected double weight;
     protected Integer maxCellsByMove;
     protected double killosOfMealToSatisfaction;
@@ -61,24 +61,21 @@ public abstract class Animal implements Eatable {
     public void move() {
         try {
             if (reentrantLock.tryLock(100, TimeUnit.MILLISECONDS)) {
-
                 try {
                     if(maxCellsByMove != 0)
                     {
                         int steps = Randomizer.generateNum(maxCellsByMove);
                         Direction direction = Direction.random();
-                        int newX = x + direction.dx * steps;
-                        int newY = y + direction.dy * steps;
+                        int newX = mapPositionX + direction.dx * steps;
+                        int newY = mapPositionY + direction.dy * steps;
 
                         if (Island.isValidPosition(newX, newY, this.getClass())) {
-                            this.x = newX;
-                            this.y = newY;
+                            this.mapPositionX = newX;
+                            this.mapPositionY = newY;
                         }
                     }
                 } catch (NoSuchFieldException | IllegalAccessException e) {
                     System.out.println("Ошибка при проверке позиции: " + e.getMessage());
-                } finally {
-                    reentrantLock.unlock();
                 }
             } else {
                 System.out.println("Не удалось заблокировать животное для перемещения");
@@ -86,15 +83,17 @@ public abstract class Animal implements Eatable {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             System.out.println("Поток прерван: " + e.getMessage());
+        } finally {
+            reentrantLock.unlock();
         }
     }
 
-    public Integer getX() {
-        return x;
+    public Integer getMapPositionX() {
+        return mapPositionX;
     }
 
-    public Integer getY() {
-        return y;
+    public Integer getMapPositionY() {
+        return mapPositionY;
     }
 }
 

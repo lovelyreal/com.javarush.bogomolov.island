@@ -1,21 +1,20 @@
 package service;
 
-import Entities.Animals.Herbivore.*;
-import Entities.Animals.Predators.*;
-import Entities.Plant;
-import Util.AnimalFactory;
-import Util.Eatable;
-import Util.Settings;
-
+import entity.Animal;
+import entity.animal.herbivore.*;
+import entity.animal.predator.*;
+import entity.Plant;
+import entity.Eatable;
+import util.AnimalFactory;
+import util.Settings;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Island {
     Random rand = new Random();
-    private static Location[][] locations = new Location[Settings.x][Settings.y];
+    private static Location[][] locations = new Location[Settings.MAP_SIZE_X][Settings.MAP_SIZE_Y];
 
 
     public class Location {
@@ -41,11 +40,15 @@ public class Island {
         public List<Eatable> getAnimals() {
             return animals;
         }
+
+        public void breedAnimals(){
+
+        }
     }
 
     public void createNewIsland() {
-        for (int i = 0; i < Settings.x; i++) {
-            for (int j = 0; j < Settings.y; j++) {
+        for (int i = 0; i < Settings.MAP_SIZE_X; i++) {
+            for (int j = 0; j < Settings.MAP_SIZE_Y; j++) {
                 locations[i][j] = new Location();
                 try {
                     locations[i][j].generateAnimals(i, j);
@@ -57,8 +60,8 @@ public class Island {
     }
 
     public void info() {
-        for (int i = 0; i < Settings.x; i++) {
-            for (int j = 0; j < Settings.y; j++) {
+        for (int i = 0; i < Settings.MAP_SIZE_X; i++) {
+            for (int j = 0; j < Settings.MAP_SIZE_Y; j++) {
 //            long animalCounter = 0;
 //            int space = 0;
 //            System.out.println("Location" + "{" + i + "}" + "START");
@@ -143,7 +146,7 @@ public class Island {
     }
 
     public static boolean isValidPosition(int newX, int newY, Class<? extends Eatable> animal) throws NoSuchFieldException, IllegalAccessException {
-        if (newX < 0 || newX >= Settings.x || newY < 0 || newY >= Settings.y) {
+        if (newX < 0 || newX >= Settings.MAP_SIZE_X || newY < 0 || newY >= Settings.MAP_SIZE_Y) {
             return false;
         }
         if (animalCounterByXY(newX, newY, animal) < animal.getDeclaredField("maxAmountInOneCell").getInt(null)) {

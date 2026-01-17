@@ -1,15 +1,15 @@
-package Entities.Animals.Herbivore;
+package entity.animal.herbivore;
 
-import Entities.Animal;
-import Entities.Plant;
+import entity.Animal;
+import entity.Plant;
 
 import java.util.Map;
 
 public class Boar extends Animal{
     public static int maxAmountInOneCell = 50;
     public Boar(int x, int y) {
-        this.x = x;
-        this.y = y;
+        this.mapPositionX = x;
+        this.mapPositionY = y;
         weight = 400D;
         maxCellsByMove = 2;
         killosOfMealToSatisfaction = 50;

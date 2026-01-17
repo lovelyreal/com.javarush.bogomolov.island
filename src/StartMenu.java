@@ -1,6 +1,7 @@
-import Util.Settings;
+
+import service.AnimalLifeTask;
 import service.Island;
-import service.Task;
+import service.IslandInfoTask;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -12,21 +13,18 @@ public class StartMenu {
         long taskCount = 0;
         Island myIsland = new Island();
         myIsland.createNewIsland();
-        myIsland.info();
+        //myIsland.info();
         System.out.println("/".repeat(100));
-        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(4);
-        //System.out.println("ExecutorService создан: " + executorService);
-        for (int i = 0; i < Settings.x; i++) {
-            for (int j = 0; j < Settings.y; j++) {
-                //System.out.println("Создаю задачу для [" + i + "][" + j + "]");
-                Task task = new Task(i, j, myIsland);
-                Thread nThread = new Thread(task);
-                nThread.start();
-                nThread.join();
-            }
+        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors()-1);
+        ScheduledExecutorService infoExecutorService = Executors.newSingleThreadScheduledExecutor();
+        executorService.scheduleAtFixedRate(new AnimalLifeTask(myIsland), 1,3, TimeUnit.SECONDS);
 
-        }
-        myIsland.info();
+        executorService.scheduleAtFixedRate(new IslandInfoTask(myIsland), 0,3, TimeUnit.SECONDS);
+
+
+
+//        infoExecutorService.close();
+//        executorService.close();
 
 
     }

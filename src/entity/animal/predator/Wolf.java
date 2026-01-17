@@ -1,20 +1,16 @@
-package Entities.Animals.Predators;
+package entity.animal.predator;
 
-import Entities.Animal;
-import Entities.Animals.Herbivore.*;
-import Util.Eatable;
-import Util.Randomizer;
-import service.Island;
+import entity.Animal;
+import entity.animal.herbivore.*;
+import entity.Eatable;
 
-import java.nio.file.DirectoryStream;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class Wolf extends Animal {
     public static int maxAmountInOneCell = 30;
     public Wolf(int x, int y) {
-        this.x = x;
-        this.y = y;
+        this.mapPositionX = x;
+        this.mapPositionY = y;
 
         weight = 50D;
         maxCellsByMove = 3;

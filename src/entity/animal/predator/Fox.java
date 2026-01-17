@@ -1,18 +1,18 @@
-package Entities.Animals.Predators;
+package entity.animal.predator;
 
-import Entities.Animal;
-import Entities.Animals.Herbivore.Caterpillar;
-import Entities.Animals.Herbivore.Duck;
-import Entities.Animals.Herbivore.Mouse;
-import Entities.Animals.Herbivore.Rabbit;
+import entity.Animal;
+import entity.animal.herbivore.Caterpillar;
+import entity.animal.herbivore.Duck;
+import entity.animal.herbivore.Mouse;
+import entity.animal.herbivore.Rabbit;
 
 import java.util.Map;
 
 public class Fox extends Animal {
     public static int maxAmountInOneCell = 30;
     public Fox(int x, int y) {
-        this.x = x;
-        this.y = y;
+        this.mapPositionX = x;
+        this.mapPositionY = y;
         weight = 8D;
         maxCellsByMove = 1;
         killosOfMealToSatisfaction = 3;

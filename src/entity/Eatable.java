@@ -1,4 +1,4 @@
-package Util;
+package entity;
 
 public interface Eatable {
 }

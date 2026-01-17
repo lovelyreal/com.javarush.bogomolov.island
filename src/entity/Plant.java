@@ -1,6 +1,4 @@
-package Entities;
-
-import Util.Eatable;
+package entity;
 
 public class Plant implements Eatable {
     private int x;
