@@ -7,9 +7,11 @@ import entity.Plant;
 import entity.Eatable;
 import util.AnimalFactory;
 import util.Settings;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Island {
@@ -41,8 +43,47 @@ public class Island {
             return animals;
         }
 
-        public void breedAnimals(){
+        public void breedAnimals() {
+            int x = 0;
+            int y = 0;
+            try {
+                if (reentrantLock.tryLock(100, TimeUnit.MILLISECONDS)) {
 
+                    for (Class<? extends Eatable> animalClass : Settings.listOfAnimals) {
+                        List<Eatable> list = animals.stream().filter(animal -> animal.getClass() == animalClass).toList();
+                        if (list.get(0) instanceof Animal && list.get(0).getClass() != Caterpillar.class) {
+                            Animal i1 = (Animal) list.get(0);
+                            x = i1.getMapPositionX();
+                            y = i1.getMapPositionY();
+
+                            long countAnimals = animalCountInCurrentLocations(animalClass, this);
+                            if (countAnimals > 2) {
+                                int breedReadyAnimals = (int) countAnimals / 2;
+                                try {
+                                    Field animalAmount = animalClass.getDeclaredField("maxAmountInOneCell");
+                                    animalAmount.setAccessible(true);
+                                    for (int i = 0; i < breedReadyAnimals; i++) {
+                                        if (countAnimals < animalAmount.getInt(null)) {
+                                            animals.add(AnimalFactory.createNewAnimal(x, y, animalClass));
+                                        }
+                                    }
+
+                                } catch (IllegalAccessException e) {
+                                    System.out.println("Доступ запрещен!");
+                                } catch (NoSuchFieldException e) {
+                                    System.out.println("такого поля нет");
+                                }
+
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            finally {
+                reentrantLock.unlock();
+            }
         }
     }
 
@@ -59,76 +100,14 @@ public class Island {
         }
     }
 
-    public void info() {
-        for (int i = 0; i < Settings.MAP_SIZE_X; i++) {
-            for (int j = 0; j < Settings.MAP_SIZE_Y; j++) {
-//            long animalCounter = 0;
-//            int space = 0;
-//            System.out.println("Location" + "{" + i + "}" + "START");
-//            Location[] location = locations[i];
-//            for (Class<? extends Eatable> listOfAnimal : Settings.listOfAnimals) {
-//                try {
-//                    if (space == 5) {
-//                        System.out.println();
-//                        space = 0;
-//                    }
-//                    System.out.print(listOfAnimal.getDeclaredConstructor(int.class, int.class)
-//                            .newInstance(999, 999).toString() + " -> " +
-//                            animalCountInLocations(listOfAnimal, location) + " ");
-//                    space++;
-//                } catch (InstantiationException | InvocationTargetException | IllegalAccessException |
-//                         NoSuchMethodException e) {
-//                    System.out.println("Ошибка!!!");
-//                }
-//            }
-//
-//            System.out.println();
-//            System.out.println("Location" + "{" + i + "}" + "END");
 
-                System.out.println("Location" + "{" + i + " ; " + j + "}" + "START");
-                printAnimalCount("\uD83D\uDC3A", Wolf.class, this.locations[i][j].animals);
-                printAnimalCount("\uD83E\uDD8A", Fox.class, this.locations[i][j].animals);
-                printAnimalCount("\uD83E\uDD85", Eagle.class, this.locations[i][j].animals);
-                printAnimalCount("\uD83D\uDC0D", BoaConstrictor.class, this.locations[i][j].animals);
-                printAnimalCount("\uD83D\uDC3B", Bear.class, this.locations[i][j].animals);
-                System.out.println();
-                printAnimalCount("\uD83D\uDC11", Sheep.class, this.locations[i][j].animals);
-                printAnimalCount("\uD83D\uDC07", Rabbit.class, this.locations[i][j].animals);
-                printAnimalCount("\uD83D\uDC01", Mouse.class, this.locations[i][j].animals);
-                printAnimalCount("\uD83D\uDC34", Horse.class, this.locations[i][j].animals);
-                printAnimalCount("\uD83D\uDC10", Goat.class, this.locations[i][j].animals);
-                System.out.println();
-                printAnimalCount("\uD83E\uDD86", Duck.class, this.locations[i][j].animals);
-                printAnimalCount("\uD83E\uDD8C", Deer.class, this.locations[i][j].animals);
-                printAnimalCount("\uD83D\uDC1B", Caterpillar.class, this.locations[i][j].animals);
-                printAnimalCount("\uD83D\uDC03", Buffalo.class, this.locations[i][j].animals);
-                printAnimalCount("\uD83D\uDC17", Boar.class, this.locations[i][j].animals);
-                printAnimalCount("\uD83C\uDF3F", Plant.class, this.locations[i][j].animals);
-                System.out.println();
-                System.out.println("Location" + "{" + i + " ; " + j + "}" + "END");
-                System.out.println("/".repeat(10));
-
-            }
-        }
-    }
-
-    private void printAnimalCount(String emoji, Class<?> animalClass, List<Eatable> animals) {
-        long count = animals.stream()
-                .filter(animalClass::isInstance)
-                .count();
-        System.out.print(emoji + " -> " + count + ';');
-    }
-
-
-    public long animalCountInLocations(Class<? extends Eatable> animalClass, Location[] locations) {
+    public long animalCountInCurrentLocations(Class<? extends Eatable> animalClass, Location location) {
         long result = 0;
-        for (Location location : locations) {
-            if (location != null && location.animals != null) {
-                result += location.animals.stream()
-                        .filter(Objects::nonNull)
-                        .filter(animalClass::isInstance)
-                        .count();
-            }
+        if (location.animals != null) {
+            result += location.animals.stream()
+                    .filter(Objects::nonNull)
+                    .filter(animalClass::isInstance)
+                    .count();
         }
         return result;
     }

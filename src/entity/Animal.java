@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class Animal implements Eatable {
-    protected int maxAmountInOneCell;
+    protected static int maxAmountInOneCell;
 
     protected ReentrantLock reentrantLock = new ReentrantLock(true);
     protected Integer mapPositionX;
@@ -43,13 +43,6 @@ public abstract class Animal implements Eatable {
             return VALUES[Randomizer.generateNum(VALUES.length)];
         }
 
-        public int getDx() {
-            return dx;
-        }
-
-        public int getDy() {
-            return dy;
-        }
     }
 
 
@@ -59,32 +52,20 @@ public abstract class Animal implements Eatable {
 
 
     public void move() {
-        try {
-            if (reentrantLock.tryLock(100, TimeUnit.MILLISECONDS)) {
-                try {
-                    if(maxCellsByMove != 0)
-                    {
-                        int steps = Randomizer.generateNum(maxCellsByMove);
-                        Direction direction = Direction.random();
-                        int newX = mapPositionX + direction.dx * steps;
-                        int newY = mapPositionY + direction.dy * steps;
+        if (maxCellsByMove != 0) {
+            try {
+                int steps = Randomizer.generateNum(maxCellsByMove);
+                Direction direction = Direction.random();
+                int newX = mapPositionX + direction.dx * steps;
+                int newY = mapPositionY + direction.dy * steps;
 
-                        if (Island.isValidPosition(newX, newY, this.getClass())) {
-                            this.mapPositionX = newX;
-                            this.mapPositionY = newY;
-                        }
-                    }
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    System.out.println("Ошибка при проверке позиции: " + e.getMessage());
+                if (Island.isValidPosition(newX, newY, this.getClass())) {
+                    this.mapPositionX = newX;
+                    this.mapPositionY = newY;
                 }
-            } else {
-                System.out.println("Не удалось заблокировать животное для перемещения");
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                System.out.println("Ошибка при проверке позиции: " + e.getMessage());
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            System.out.println("Поток прерван: " + e.getMessage());
-        } finally {
-            reentrantLock.unlock();
         }
     }
 

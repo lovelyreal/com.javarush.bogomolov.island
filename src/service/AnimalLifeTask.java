@@ -30,11 +30,11 @@ public class AnimalLifeTask implements Runnable {
     }
 
     private void processLocation(int x, int y) {
-        boolean locked = false;
 
         try {
 
-            locked = locations[x][y].reentrantLock.tryLock(100, TimeUnit.MILLISECONDS);
+            int timeout = locations[x][y].getAnimals().size() > 5 ? 50 : 10;
+            locations[x][y].reentrantLock.tryLock(timeout, TimeUnit.MILLISECONDS);
 
             List<Animal> animals = new ArrayList<>();
             for (Eatable entity : locations[x][y].getAnimals()) {
@@ -42,32 +42,33 @@ public class AnimalLifeTask implements Runnable {
                     animals.add((Animal) entity);
                 }
             }
-            animals.forEach(animal -> processAnimal(animal, x, y));
+            animals.forEach(t -> processAnimal(t,x,y));
+
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (Exception e) {
             System.err.println("Ошибка в клетке [" + x + "][" + y + "]: " + e.getMessage());
         } finally {
-            if (locked) {
                 locations[x][y].reentrantLock.unlock();
-            }
+
         }
     }
 
     private void processAnimal(Animal animal, int currentX, int currentY) {
+        if(animal.getMaxCellsByMove() == 0){return;}
 
         int oldX = animal.getMapPositionX();
         int oldY = animal.getMapPositionY();
 
-
-        //locations[oldX][oldY].getAnimals().add(AnimalFactory.createNewAnimal(oldX,oldY, Wolf.class));
         animal.move();
 
         int newX = animal.getMapPositionX();
         int newY = animal.getMapPositionY();
-        if ((newX != oldX || newY != oldY) &&
-                (newX != currentX || newY != currentY)) {
+        if (newX == oldX && newY == oldY) {
+            return;
+        }
+        if (newX != currentX || newY != currentY) {
             if (lockBothLocations(currentX, currentY, newX, newY)) {
                 try {
                     locations[currentX][currentY].getAnimals().remove(animal);

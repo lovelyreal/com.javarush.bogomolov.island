@@ -8,8 +8,8 @@ import entity.Plant;
 import java.util.List;
 
 public class Settings {
-    public static Integer MAP_SIZE_X = 5;
-    public static Integer MAP_SIZE_Y = 20;
+    public static Integer MAP_SIZE_X = 15;
+    public static Integer MAP_SIZE_Y = 15;
     public static Integer maxAmountOfAnimalsInOneCell = 2545;
     public static List<Class<? extends Eatable>> listOfAnimals = List.of(Wolf.class,Fox.class,Eagle.class,
             BoaConstrictor.class,Bear.class,Sheep.class,Rabbit.class,Mouse.class,Horse.class,

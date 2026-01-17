@@ -32,7 +32,7 @@ public class IslandInfoTask implements Runnable {
 
                 boolean locked = false;
                 try {
-                    locked = locations[i][j].reentrantLock.tryLock(500, TimeUnit.MILLISECONDS);
+                    locked = locations[i][j].reentrantLock.tryLock(100, TimeUnit.MILLISECONDS);
                     if (locked) {
                         List<? extends Class<? extends Eatable>> list =
                                 locations[i][j].getAnimals()
