@@ -2,10 +2,13 @@ package service;
 
 import entity.Animal;
 import entity.Eatable;
+import util.AnimalFactory;
 import util.Settings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 
@@ -24,32 +27,41 @@ public class AnimalLifeTask implements Runnable {
     public void run() {
         for (int i = 0; i < MAP_SIZE_X; i++) {
             for (int j = 0; j < MAP_SIZE_Y; j++) {
-                processLocation(i, j);
+                try {
+                    processLocation(i, j);
+                } catch (InterruptedException e) {
+                    System.out.println("Ошибочка!");
+                }
             }
         }
     }
 
-    private void processLocation(int x, int y) {
+    private void processLocation(int x, int y) throws InterruptedException {
 
         try {
 
             int timeout = locations[x][y].getAnimals().size() > 5 ? 50 : 10;
             locations[x][y].reentrantLock.tryLock(timeout, TimeUnit.MILLISECONDS);
-
-            List<Animal> animals = new ArrayList<>();
-            for (Eatable entity : locations[x][y].getAnimals()) {
-                if (entity instanceof Animal) {
-                    animals.add((Animal) entity);
-                }
+            Map<Class<? extends Eatable>, ArrayList<Eatable>> currentMap = locations[x][y].getAnimals();
+            for (Class<? extends Eatable> aClass : currentMap.keySet()) {
+                currentMap.get(aClass).stream()
+                        .filter(Objects::nonNull)
+                        .filter(u -> u instanceof Animal)
+                        .map(u -> (Animal) u).forEach(u -> processAnimal(u,x,y));
             }
-            animals.forEach(t -> processAnimal(t,x,y));
 
 
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } catch (Exception e) {
-            System.err.println("Ошибка в клетке [" + x + "][" + y + "]: " + e.getMessage());
-        } finally {
+//            List<Animal> animals = new ArrayList<>();
+//            for (Eatable entity : locations[x][y].getAnimals(;) {
+//                if (entity instanceof Animal) {
+//                    animals.add((Animal) entity);
+//                }
+//            }
+//            animals.forEach(t -> processAnimal(t,x,y));
+
+
+
+        }  finally {
                 locations[x][y].reentrantLock.unlock();
 
         }
@@ -71,8 +83,8 @@ public class AnimalLifeTask implements Runnable {
         if (newX != currentX || newY != currentY) {
             if (lockBothLocations(currentX, currentY, newX, newY)) {
                 try {
-                    locations[currentX][currentY].getAnimals().remove(animal);
-                    locations[newX][newY].getAnimals().add(animal);
+                    locations[currentX][currentY].getAnimals().get(animal.getClass()).removeFirst();
+                    locations[newX][newY].getAnimals().get(animal.getClass()).add(AnimalFactory.createNewAnimal(newX,newY,animal.getClass()));
                 } finally {
                     unlockBothLocations(currentX, currentY, newX, newY);
                 }

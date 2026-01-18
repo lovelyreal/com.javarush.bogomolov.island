@@ -8,6 +8,6 @@ public class Randomizer {
         public static int generateNum (int bound){
             int result = 0;
             result = ThreadLocalRandom.current().nextInt(bound);
-        return result;
+        return result == 0 ? 1 : result;
     }
 }

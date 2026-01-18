@@ -21,6 +21,7 @@ public class IslandInfoTask implements Runnable {
 
     @Override
     public void run() {
+        Integer result = 0;
         System.out.print("Day:" + islandDay);
         System.out.println();
 
@@ -34,14 +35,12 @@ public class IslandInfoTask implements Runnable {
                 try {
                     locked = locations[i][j].reentrantLock.tryLock(100, TimeUnit.MILLISECONDS);
                     if (locked) {
-                        List<? extends Class<? extends Eatable>> list =
-                                locations[i][j].getAnimals()
-                                        .stream()
-                                        .map(Eatable::getClass)
-                                        .toList();
-                        for (Class<? extends Eatable> animalClass : list) {
-                            animalCount.put(animalClass, animalCount.get(animalClass) + 1);
+                        for (Class<? extends Eatable> aClass : locations[i][j].getAnimals().keySet()) {
+                            Integer i1 = animalCount.get(aClass);
+                            i1 += locations[i][j].getAnimals().get(aClass).size();
+                            animalCount.put(aClass,i1);
                         }
+
                     }
                 } catch (InterruptedException e) {
                     System.out.println("Процесс сбора статистики прервали!!!");

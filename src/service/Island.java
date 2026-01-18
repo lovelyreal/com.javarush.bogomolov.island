@@ -22,69 +22,76 @@ public class Island {
     public class Location {
         public final ReentrantLock reentrantLock = new ReentrantLock();
         private Map<Class<? extends Eatable>, Integer> amountOfEntitiesInOneLocation;
-        private List<Eatable> animals = new ArrayList<>(Settings.maxAmountOfAnimalsInOneCell);
+        private Map<Class<? extends Eatable>, ArrayList<Eatable>> animals = new HashMap<>();
+        //private List<Eatable> animals = new ArrayList<>(Settings.maxAmountOfAnimalsInOneCell);
 
 
         public void generateAnimals(int x, int y) throws Exception {
+
+            for (Class<? extends Eatable> listOfAnimal : Settings.listOfAnimals) {
+                animals.put(listOfAnimal, new ArrayList<>());
+            }
+
+
             for (Class<? extends Eatable> animal : Settings.listOfAnimals) {
                 Field field = animal.getDeclaredField("maxAmountInOneCell");
                 field.setAccessible(true);
-                int numSpecies = rand.nextInt(field.getInt(null)) + 1;
-                Constructor<? extends Eatable> constructor = animal.getDeclaredConstructor(int.class, int.class);
+                int numSpecies = rand.nextInt(field.getInt(null));
+                ArrayList<Eatable> a = new ArrayList<>();
                 for (int i = 0; i < numSpecies; i++) {
-                    Eatable nAnimal = constructor.newInstance(x, y);
-                    animals.add(nAnimal);
+                    Eatable nAnimal = AnimalFactory.createNewAnimal(x, y, animal);
+                    a.add(nAnimal);
                 }
+                animals.put(animal,a);
             }
-
         }
 
-        public List<Eatable> getAnimals() {
+        public Map<Class<? extends Eatable>, ArrayList<Eatable>> getAnimals() {
             return animals;
         }
 
-        public void breedAnimals() {
-            int x = 0;
-            int y = 0;
-            try {
-                if (reentrantLock.tryLock(100, TimeUnit.MILLISECONDS)) {
-
-                    for (Class<? extends Eatable> animalClass : Settings.listOfAnimals) {
-                        List<Eatable> list = animals.stream().filter(animal -> animal.getClass() == animalClass).toList();
-                        if (list.get(0) instanceof Animal && list.get(0).getClass() != Caterpillar.class) {
-                            Animal i1 = (Animal) list.get(0);
-                            x = i1.getMapPositionX();
-                            y = i1.getMapPositionY();
-
-                            long countAnimals = animalCountInCurrentLocations(animalClass, this);
-                            if (countAnimals > 2) {
-                                int breedReadyAnimals = (int) countAnimals / 2;
-                                try {
-                                    Field animalAmount = animalClass.getDeclaredField("maxAmountInOneCell");
-                                    animalAmount.setAccessible(true);
-                                    for (int i = 0; i < breedReadyAnimals; i++) {
-                                        if (countAnimals < animalAmount.getInt(null)) {
-                                            animals.add(AnimalFactory.createNewAnimal(x, y, animalClass));
-                                        }
-                                    }
-
-                                } catch (IllegalAccessException e) {
-                                    System.out.println("Доступ запрещен!");
-                                } catch (NoSuchFieldException e) {
-                                    System.out.println("такого поля нет");
-                                }
-
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            finally {
-                reentrantLock.unlock();
-            }
-        }
+//        public void breedAnimals() {
+//            int x = 0;
+//            int y = 0;
+//            try {
+//                if (reentrantLock.tryLock(100, TimeUnit.MILLISECONDS)) {
+//
+//                    for (Class<? extends Eatable> animalClass : Settings.listOfAnimals) {
+//                        List<Eatable> list = animals.stream().filter(animal -> animal.getClass() == animalClass).toList();
+//                        if (list.get(0) instanceof Animal && list.get(0).getClass() != Caterpillar.class) {
+//                            Animal i1 = (Animal) list.get(0);
+//                            x = i1.getMapPositionX();
+//                            y = i1.getMapPositionY();
+//
+//                            long countAnimals = animalCountInCurrentLocations(animalClass, this);
+//                            if (countAnimals > 2) {
+//                                int breedReadyAnimals = (int) countAnimals / 2;
+//                                try {
+//                                    Field animalAmount = animalClass.getDeclaredField("maxAmountInOneCell");
+//                                    animalAmount.setAccessible(true);
+//                                    for (int i = 0; i < breedReadyAnimals; i++) {
+//                                        if (countAnimals < animalAmount.getInt(null)) {
+//                                            animals.add(AnimalFactory.createNewAnimal(x, y, animalClass));
+//                                        }
+//                                    }
+//
+//                                } catch (IllegalAccessException e) {
+//                                    System.out.println("Доступ запрещен!");
+//                                } catch (NoSuchFieldException e) {
+//                                    System.out.println("такого поля нет");
+//                                }
+//
+//                            }
+//                        }
+//                    }
+//                }
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//            }
+//            finally {
+//                reentrantLock.unlock();
+//            }
+//        }
     }
 
     public void createNewIsland() {
@@ -101,23 +108,19 @@ public class Island {
     }
 
 
-    public long animalCountInCurrentLocations(Class<? extends Eatable> animalClass, Location location) {
-        long result = 0;
-        if (location.animals != null) {
-            result += location.animals.stream()
-                    .filter(Objects::nonNull)
-                    .filter(animalClass::isInstance)
-                    .count();
-        }
-        return result;
-    }
+//    public long animalCountInCurrentLocations(Class<? extends Eatable> animalClass, Location location) {
+//        long result = 0;
+//        if (location.animals != null) {
+//            result += location.animals.stream()
+//                    .filter(Objects::nonNull)
+//                    .filter(animalClass::isInstance)
+//                    .count();
+//        }
+//        return result;
+//    }
 
     private static long animalCounterByXY(int x, int y, Class<? extends Eatable> animalClass) {
-        long count = locations[x][y].animals.stream()
-                .filter(Objects::nonNull)
-                .filter(animalClass::isInstance)
-                .count();
-        return count;
+        return locations[x][y].animals.get(animalClass).size();
     }
 
     public Location[][] getLocations() {
@@ -133,13 +136,5 @@ public class Island {
         } else {
             return false;
         }
-    }
-
-    public static void addAnimal(int x, int y, Eatable animal) {
-        locations[x][y].animals.add(animal);
-    }
-
-    public static void removeAnimal(int x, int y, Eatable animal) {
-        locations[x][y].animals.remove(animal);
     }
 }
