@@ -15,7 +15,7 @@ public class StartMenu {
         System.out.println("/".repeat(100));
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors()-1);
         ScheduledExecutorService infoExecutorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleAtFixedRate(new AnimalLifeTask(myIsland), 0,2, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(new AnimalLifeTask(myIsland), 1,2, TimeUnit.SECONDS);
 
         infoExecutorService.scheduleAtFixedRate(new IslandInfoTask(myIsland), 0,2, TimeUnit.SECONDS);
 

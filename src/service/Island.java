@@ -1,17 +1,9 @@
 package service;
-
-import entity.Animal;
-import entity.animal.herbivore.*;
-import entity.animal.predator.*;
-import entity.Plant;
 import entity.Eatable;
 import util.AnimalFactory;
 import util.Settings;
-
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Island {
@@ -21,18 +13,11 @@ public class Island {
 
     public class Location {
         public final ReentrantLock reentrantLock = new ReentrantLock();
-        private Map<Class<? extends Eatable>, Integer> amountOfEntitiesInOneLocation;
-        private Map<Class<? extends Eatable>, ArrayList<Eatable>> animals = new HashMap<>();
-        //private List<Eatable> animals = new ArrayList<>(Settings.maxAmountOfAnimalsInOneCell);
+        private Map<Class<? extends Eatable>, ArrayList<Eatable>> animals;
 
 
         public void generateAnimals(int x, int y) throws Exception {
-
-            for (Class<? extends Eatable> listOfAnimal : Settings.listOfAnimals) {
-                animals.put(listOfAnimal, new ArrayList<>());
-            }
-
-
+            animals = new HashMap<>();
             for (Class<? extends Eatable> animal : Settings.listOfAnimals) {
                 Field field = animal.getDeclaredField("maxAmountInOneCell");
                 field.setAccessible(true);
@@ -42,7 +27,7 @@ public class Island {
                     Eatable nAnimal = AnimalFactory.createNewAnimal(x, y, animal);
                     a.add(nAnimal);
                 }
-                animals.put(animal,a);
+                animals.put(animal, a);
             }
         }
 
@@ -127,14 +112,21 @@ public class Island {
         return locations;
     }
 
-    public static boolean isValidPosition(int newX, int newY, Class<? extends Eatable> animal) throws NoSuchFieldException, IllegalAccessException {
-        if (newX < 0 || newX >= Settings.MAP_SIZE_X || newY < 0 || newY >= Settings.MAP_SIZE_Y) {
+    public static boolean isValidPosition(int newX, int newY, Class<? extends Eatable> animal) {
+        if (newX < 0 || newX >= Settings.MAP_SIZE_X ||
+                newY < 0 || newY >= Settings.MAP_SIZE_Y) {
             return false;
         }
-        if (animalCounterByXY(newX, newY, animal) < animal.getDeclaredField("maxAmountInOneCell").getInt(null)) {
-            return true;
-        } else {
+        Location loc = locations[newX][newY];
+        loc.reentrantLock.lock();
+        try {
+            int count = loc.animals.get(animal).size();
+            int max = animal.getDeclaredField("maxAmountInOneCell").getInt(null);
+            return count < max;
+        } catch (Exception e) {
             return false;
+        } finally {
+            loc.reentrantLock.unlock();
         }
     }
 }

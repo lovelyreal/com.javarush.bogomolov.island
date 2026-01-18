@@ -19,6 +19,11 @@ public abstract class Animal implements Eatable {
     protected double currentKillosOfMeal = killosOfMealToSatisfaction / 2d;
     protected Map<Class<? extends Eatable>, Integer> diet;
 
+    public void setMapPosition(int newX, int newY) {
+        this.mapPositionX = newX;
+        this.mapPositionY = newY;
+    }
+
     public enum Direction {
         LEFT(-1, 0),
         RIGHT(1, 0),
@@ -52,19 +57,28 @@ public abstract class Animal implements Eatable {
 
 
     public void move() {
-        if (maxCellsByMove != 0) {
-            try {
-                int steps = Randomizer.generateNum(maxCellsByMove);
-                Direction direction = Direction.random();
-                int newX = mapPositionX + direction.dx * steps;
-                int newY = mapPositionY + direction.dy * steps;
+        if (maxCellsByMove == 0) return;
 
-                if (Island.isValidPosition(newX, newY, this.getClass())) {
-                    this.mapPositionX = newX;
-                    this.mapPositionY = newY;
-                }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                System.out.println("Ошибка при проверке позиции: " + e.getMessage());
+        boolean locked = false;
+        try {
+            locked = reentrantLock.tryLock(100, TimeUnit.MILLISECONDS);
+            if (!locked) return;
+
+            int steps = Randomizer.generateNum(maxCellsByMove);
+            Direction direction = Direction.random();
+
+            int newX = mapPositionX + direction.dx * steps;
+            int newY = mapPositionY + direction.dy * steps;
+
+            if (Island.isValidPosition(newX, newY, this.getClass())) {
+                this.mapPositionX = newX;
+                this.mapPositionY = newY;
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            if (locked) {
+                reentrantLock.unlock();
             }
         }
     }
