@@ -59,6 +59,7 @@ public class AnimalLifeTask implements Runnable {
                         .map(Animal.class::cast)
                         .forEach(u -> processAnimal(u, x, y));
             }
+            locations[x][y].breed(x,y);
         } finally {
             locations[x][y].reentrantLock.unlock();
         }

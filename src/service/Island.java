@@ -35,48 +35,41 @@ public class Island {
             return animals;
         }
 
-//        public void breedAnimals() {
-//            int x = 0;
-//            int y = 0;
-//            try {
-//                if (reentrantLock.tryLock(100, TimeUnit.MILLISECONDS)) {
-//
-//                    for (Class<? extends Eatable> animalClass : Settings.listOfAnimals) {
-//                        List<Eatable> list = animals.stream().filter(animal -> animal.getClass() == animalClass).toList();
-//                        if (list.get(0) instanceof Animal && list.get(0).getClass() != Caterpillar.class) {
-//                            Animal i1 = (Animal) list.get(0);
-//                            x = i1.getMapPositionX();
-//                            y = i1.getMapPositionY();
-//
-//                            long countAnimals = animalCountInCurrentLocations(animalClass, this);
-//                            if (countAnimals > 2) {
-//                                int breedReadyAnimals = (int) countAnimals / 2;
-//                                try {
-//                                    Field animalAmount = animalClass.getDeclaredField("maxAmountInOneCell");
-//                                    animalAmount.setAccessible(true);
-//                                    for (int i = 0; i < breedReadyAnimals; i++) {
-//                                        if (countAnimals < animalAmount.getInt(null)) {
-//                                            animals.add(AnimalFactory.createNewAnimal(x, y, animalClass));
-//                                        }
-//                                    }
-//
-//                                } catch (IllegalAccessException e) {
-//                                    System.out.println("Доступ запрещен!");
-//                                } catch (NoSuchFieldException e) {
-//                                    System.out.println("такого поля нет");
-//                                }
-//
-//                            }
-//                        }
-//                    }
-//                }
-//            } catch (Exception e) {
-//                throw new RuntimeException(e);
-//            }
-//            finally {
-//                reentrantLock.unlock();
-//            }
-//        }
+        public void breed(int x, int y) {
+            reentrantLock.lock();
+            try {
+                for (Class<? extends Eatable> species : animals.keySet()) {
+
+                    List<Eatable> list = animals.get(species);
+                    if (list == null || list.size() < 2) continue;
+
+
+
+                    int current = list.size();
+
+                    int max;
+                    try {
+                        Field f = species.getDeclaredField("maxAmountInOneCell");
+                        f.setAccessible(true);
+                        max = f.getInt(null);
+                    } catch (Exception e) {
+                        continue;
+                    }
+
+                    int newborns = current / 2;
+                    int availableSpace = max - current;
+
+                    int toCreate = Math.min(newborns, availableSpace);
+
+                    for (int i = 0; i < toCreate; i++) {
+                        Eatable baby = AnimalFactory.createNewAnimal(x, y, species);
+                        list.add(baby);
+                    }
+                }
+            } finally {
+                reentrantLock.unlock();
+            }
+        }
     }
 
     public void createNewIsland() {
