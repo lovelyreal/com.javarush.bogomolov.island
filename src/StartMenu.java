@@ -13,13 +13,19 @@ public class StartMenu {
         Island myIsland = new Island();
         myIsland.createNewIsland();
         System.out.println("/".repeat(100));
-        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
-        ScheduledExecutorService infoExecutorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleAtFixedRate(new AnimalLifeTask(myIsland), 1,2, TimeUnit.SECONDS);
-
-        infoExecutorService.scheduleAtFixedRate(new IslandInfoTask(myIsland), 0,2, TimeUnit.SECONDS);
+        try(ScheduledExecutorService executorService = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
+                ScheduledExecutorService infoExecutorService = Executors.newSingleThreadScheduledExecutor()){
 
 
+
+
+            executorService.scheduleAtFixedRate(new AnimalLifeTask(myIsland), 1,2, TimeUnit.SECONDS);
+
+            infoExecutorService.scheduleAtFixedRate(new IslandInfoTask(myIsland), 0,2, TimeUnit.SECONDS);
+
+            Thread.sleep(10000);
+
+        }
 
 //        infoExecutorService.close();
 //       ecutorService.close();

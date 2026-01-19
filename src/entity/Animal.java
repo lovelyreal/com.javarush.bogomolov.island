@@ -73,6 +73,7 @@ public abstract class Animal implements Eatable {
             if (Island.isValidPosition(newX, newY, this.getClass())) {
                 this.mapPositionX = newX;
                 this.mapPositionY = newY;
+                this.currentKillosOfMeal -= 2;
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -83,6 +84,26 @@ public abstract class Animal implements Eatable {
         }
     }
 
+    public double getCurrentKillosOfMeal() {
+        return currentKillosOfMeal;
+    }
+
+    public Map<Class<? extends Eatable>, Integer> getDiet() {
+        return diet;
+    }
+
+    public Class<? extends Eatable> foundMeal(){
+        int count = Randomizer.generateNum(diet.size());
+        int i = 0;
+        for (Class<? extends Eatable> aClass : diet.keySet()) {
+            if(i == count){
+                return aClass;
+            } else {
+                i++;
+            }
+        }
+        return diet.keySet().stream().findFirst().get();
+    }
     public Integer getMapPositionX() {
         return mapPositionX;
     }

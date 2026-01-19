@@ -68,8 +68,13 @@ public class AnimalLifeTask implements Runnable {
 
         int oldX = animal.getMapPositionX();
         int oldY = animal.getMapPositionY();
+        if(animal.getCurrentKillosOfMeal() > 2){
+            animal.move();
 
-        animal.move();
+        } else {
+
+        }
+
 
         int newX = animal.getMapPositionX();
         int newY = animal.getMapPositionY();

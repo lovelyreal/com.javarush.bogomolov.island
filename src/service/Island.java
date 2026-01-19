@@ -1,10 +1,13 @@
 package service;
+import entity.Animal;
 import entity.Eatable;
 import entity.Plant;
 import util.AnimalFactory;
+import util.Randomizer;
 import util.Settings;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Island {
@@ -43,10 +46,7 @@ public class Island {
                     if (species != Plant.class) {
                         List<Eatable> list = animals.get(species);
                         if (list == null || list.size() < 2) continue;
-
-
                         int current = list.size();
-
                         int max;
                         try {
                             Field f = species.getDeclaredField("maxAmountInOneCell");
@@ -55,7 +55,6 @@ public class Island {
                         } catch (Exception e) {
                             continue;
                         }
-
                         int newborns = current / 2;
                         int availableSpace = max - current;
 
@@ -69,6 +68,37 @@ public class Island {
                 }
             } finally {
                 reentrantLock.unlock();
+            }
+        }
+
+
+
+        public void eatingProcess(int x, int y){
+            boolean locked = false;
+            try{
+                locked = reentrantLock.tryLock(100, TimeUnit.MILLISECONDS);
+                for (Class<? extends Eatable> aClass : animals.keySet()) {
+                    if(aClass != Plant.class) {
+                        List<Eatable> eatables = animals.get(aClass);
+                        List<Animal> hunters = eatables.stream().map(k -> (Animal) k).toList();
+                        for (Animal hunter : hunters) {
+                            Class<? extends Eatable> huntersMeal = hunter.foundMeal();
+                            int percentOfSuccess = Randomizer.generateNum(100);
+                            if(percentOfSuccess < hunter.getDiet().get(huntersMeal)) {
+                                List<Eatable> meals = animals.get(huntersMeal);
+
+                            }
+
+
+                        }
+                    }
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Поток прервали на этапе кормешки!");
+            } finally {
+                if(locked){
+                    reentrantLock.unlock();
+                }
             }
         }
     }
@@ -86,5 +116,25 @@ public class Island {
         }
     }
 
+    public Location[][] getLocations() {
+        return locations;
+    }
 
+    public static boolean isValidPosition(int newX, int newY, Class<? extends Eatable> animal) {
+        if (newX < 0 || newX >= Settings.MAP_SIZE_X ||
+                newY < 0 || newY >= Settings.MAP_SIZE_Y) {
+            return false;
+        }
+        Location loc = locations[newX][newY];
+        loc.reentrantLock.lock();
+        try {
+            int count = loc.animals.get(animal).size();
+            int max = animal.getDeclaredField("maxAmountInOneCell").getInt(null);
+            return count < max;
+        } catch (Exception e) {
+            return false;
+        } finally {
+            loc.reentrantLock.unlock();
+        }
+    }
 }
