@@ -91,6 +91,8 @@ public class Island {
                             if(percentOfSuccess < hunter.getDiet().get(huntersMeal)) {
                                 List<Eatable> meals = animals.get(huntersMeal);
                                 if(meals == null){return;}
+                                Eatable victim = meals.remove(0);
+                                hunter.eat(victim);
 
                             }
 
