@@ -1,10 +1,12 @@
 package service;
+
 import entity.Animal;
 import entity.Eatable;
 import entity.Plant;
 import util.AnimalFactory;
 import util.Randomizer;
 import util.Settings;
+
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -55,7 +57,7 @@ public class Island {
                         } catch (Exception e) {
                             continue;
                         }
-                        int newborns = current / 2;
+                        int newborns = current / 4;
                         int availableSpace = max - current;
 
                         int toCreate = Math.min(newborns, availableSpace);
@@ -72,13 +74,12 @@ public class Island {
         }
 
 
-
-        public void eatingProcess(int x, int y){
+        public void eatingProcess(int x, int y) {
             boolean locked = false;
-            try{
+            try {
                 locked = reentrantLock.tryLock(100, TimeUnit.MILLISECONDS);
                 for (Class<? extends Eatable> aClass : animals.keySet()) {
-                    if(aClass != Plant.class) {
+                    if (aClass != Plant.class) {
 
                         List<Eatable> eatables = animals.get(aClass);
                         List<Animal> hunters = eatables.stream()
@@ -88,12 +89,15 @@ public class Island {
                         for (Animal hunter : hunters) {
                             Class<? extends Eatable> huntersMeal = hunter.foundMeal();
                             int percentOfSuccess = Randomizer.generateNum(100);
-                            if(percentOfSuccess < hunter.getDiet().get(huntersMeal)) {
+                            if (percentOfSuccess < hunter.getDiet().get(huntersMeal)) {
                                 List<Eatable> meals = animals.get(huntersMeal);
-                                if(meals == null){return;}
-                                Eatable victim = meals.remove(0);
-                                hunter.eat(victim);
-
+                                if (meals == null) {
+                                    return;
+                                }
+                                if(meals.size() >1) {
+                                    Eatable victim = meals.remove(0);
+                                    hunter.eat(victim);
+                                }
                             }
 
 
@@ -103,7 +107,7 @@ public class Island {
             } catch (InterruptedException e) {
                 System.out.println("Поток прервали на этапе кормешки!");
             } finally {
-                if(locked){
+                if (locked) {
                     reentrantLock.unlock();
                 }
             }

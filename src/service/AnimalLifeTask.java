@@ -57,6 +57,7 @@ public class AnimalLifeTask implements Runnable {
                         .map(Animal.class::cast)
                         .forEach(u -> processAnimal(u, x, y));
             }
+            locations[x][y].eatingProcess(x,y);
             locations[x][y].breed(x,y);
         } finally {
             locations[x][y].reentrantLock.unlock();
@@ -64,42 +65,41 @@ public class AnimalLifeTask implements Runnable {
     }
 
     private void processAnimal(Animal animal, int currentX, int currentY) {
-        if (animal.getMaxCellsByMove() == 0) return;
+        if(animal.getCurrentKillosOfMeal() >= 1) {
+            if (animal.getMaxCellsByMove() == 0) return;
 
-        int oldX = animal.getMapPositionX();
-        int oldY = animal.getMapPositionY();
-        if(animal.getCurrentKillosOfMeal() > 2){
+            int oldX = animal.getMapPositionX();
+            int oldY = animal.getMapPositionY();
+
             animal.move();
 
-        } else {
 
-        }
+            int newX = animal.getMapPositionX();
+            int newY = animal.getMapPositionY();
 
+            if (newX == oldX && newY == oldY) return;
 
-        int newX = animal.getMapPositionX();
-        int newY = animal.getMapPositionY();
-
-        if (newX == oldX && newY == oldY) return;
-
-        if (!lockBothLocations(oldX, oldY, newX, newY)) {
-            animal.setMapPosition(oldX, oldY);
-            return;
-        }
-
-        try {
-            List<Eatable> oldList =
-                    locations[oldX][oldY].getAnimals().get(animal.getClass());
-
-            if (oldList != null) {
-                oldList.remove(animal);
+            if (!lockBothLocations(oldX, oldY, newX, newY)) {
+                animal.setMapPosition(oldX, oldY);
+                return;
             }
 
-            locations[newX][newY].getAnimals()
-                    .computeIfAbsent(animal.getClass(), k -> new ArrayList<>())
-                    .add(animal);
+            try {
+                List<Eatable> oldList =
+                        locations[oldX][oldY].getAnimals().get(animal.getClass());
 
-        } finally {
-            unlockBothLocations(oldX, oldY, newX, newY);
+                if (oldList != null) {
+                    oldList.remove(animal);
+                }
+
+                locations[newX][newY].getAnimals()
+                        .computeIfAbsent(animal.getClass(), k -> new ArrayList<>())
+                        .add(animal);
+
+            } finally {
+                unlockBothLocations(oldX, oldY, newX, newY);
+            }
+
         }
     }
 

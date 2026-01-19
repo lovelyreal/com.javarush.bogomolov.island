@@ -75,7 +75,7 @@ public abstract class Animal implements Eatable {
                 this.mapPositionY = newY;
                 this.currentKillosOfMeal -= 2;
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
         } finally {
             if (locked) {
@@ -84,9 +84,9 @@ public abstract class Animal implements Eatable {
         }
     }
     public void eat(Eatable meal) {
-        if (!(meal instanceof Animal || meal instanceof Plant)) return;
-
-        double mealWeight = meal.getWeight();
+        if (!(meal instanceof Animal)) return;
+        Animal nAnimal = (Animal) meal;
+        double mealWeight = nAnimal.getWeight();
 
         currentKillosOfMeal = Math.min(
                 killosOfMealToSatisfaction,
@@ -120,6 +120,10 @@ public abstract class Animal implements Eatable {
 
     public Integer getMapPositionY() {
         return mapPositionY;
+    }
+
+    public double getWeight() {
+        return weight;
     }
 }
 

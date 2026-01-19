@@ -23,7 +23,7 @@ public class StartMenu {
 
             infoExecutorService.scheduleAtFixedRate(new IslandInfoTask(myIsland), 0,2, TimeUnit.SECONDS);
 
-            Thread.sleep(10000);
+            Thread.sleep(100000);
 
         }
 
