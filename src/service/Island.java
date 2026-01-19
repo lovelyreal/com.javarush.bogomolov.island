@@ -79,13 +79,18 @@ public class Island {
                 locked = reentrantLock.tryLock(100, TimeUnit.MILLISECONDS);
                 for (Class<? extends Eatable> aClass : animals.keySet()) {
                     if(aClass != Plant.class) {
+
                         List<Eatable> eatables = animals.get(aClass);
-                        List<Animal> hunters = eatables.stream().map(k -> (Animal) k).toList();
+                        List<Animal> hunters = eatables.stream()
+                                .filter(Animal.class::isInstance)
+                                .map(Animal.class::cast)
+                                .toList();
                         for (Animal hunter : hunters) {
                             Class<? extends Eatable> huntersMeal = hunter.foundMeal();
                             int percentOfSuccess = Randomizer.generateNum(100);
                             if(percentOfSuccess < hunter.getDiet().get(huntersMeal)) {
                                 List<Eatable> meals = animals.get(huntersMeal);
+                                if(meals == null){return;}
 
                             }
 

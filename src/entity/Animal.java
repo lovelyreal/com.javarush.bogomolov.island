@@ -83,6 +83,16 @@ public abstract class Animal implements Eatable {
             }
         }
     }
+    public void eat(Eatable meal) {
+        if (!(meal instanceof Animal || meal instanceof Plant)) return;
+
+        double mealWeight = meal.getWeight();
+
+        currentKillosOfMeal = Math.min(
+                killosOfMealToSatisfaction,
+                currentKillosOfMeal + mealWeight
+        );
+    }
 
     public double getCurrentKillosOfMeal() {
         return currentKillosOfMeal;
