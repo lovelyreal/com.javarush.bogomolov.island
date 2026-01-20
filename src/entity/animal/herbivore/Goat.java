@@ -13,6 +13,7 @@ public class Goat extends Animal {
         weight = 60D;
         maxCellsByMove = 3;
         killosOfMealToSatisfaction = 10;
+        currentKillosOfMeal = killosOfMealToSatisfaction / 2;
         diet = Map.of(
                 Plant.class, 100
         );

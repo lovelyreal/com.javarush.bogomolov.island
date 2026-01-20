@@ -13,6 +13,7 @@ public class Sheep extends Animal {
         weight = 70D;
         maxCellsByMove = 3;
         killosOfMealToSatisfaction = 15;
+        currentKillosOfMeal = killosOfMealToSatisfaction / 2;
         diet = Map.of(
                 Plant.class, 100
         );

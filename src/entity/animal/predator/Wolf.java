@@ -11,10 +11,10 @@ public class Wolf extends Animal {
     public Wolf(int x, int y) {
         this.mapPositionX = x;
         this.mapPositionY = y;
-
         weight = 50D;
         maxCellsByMove = 3;
         killosOfMealToSatisfaction = 8;
+        currentKillosOfMeal = killosOfMealToSatisfaction / 2;
         diet = Map.of(
                 Horse.class, 10,
                 Deer.class, 15,

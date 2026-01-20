@@ -13,6 +13,7 @@ public class Horse extends Animal {
         weight = 400D;
         maxCellsByMove = 4;
         killosOfMealToSatisfaction = 60;
+        currentKillosOfMeal = killosOfMealToSatisfaction / 2;
         diet = Map.of(
                 Plant.class, 100
         );

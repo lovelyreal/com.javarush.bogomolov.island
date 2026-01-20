@@ -13,6 +13,7 @@ public class Bear extends Animal {
         weight = 500D;
         maxCellsByMove = 2;
         killosOfMealToSatisfaction = 80;
+        currentKillosOfMeal = killosOfMealToSatisfaction / 2;
         diet = Map.of(
                 BoaConstrictor.class,80,
                 Horse.class, 40,

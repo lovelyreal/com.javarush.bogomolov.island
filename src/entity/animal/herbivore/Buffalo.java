@@ -13,6 +13,7 @@ public class Buffalo extends Animal {
         weight = 700D;
         maxCellsByMove = 3;
         killosOfMealToSatisfaction = 100;
+        currentKillosOfMeal = killosOfMealToSatisfaction / 2;
         diet = Map.of(
                 Plant.class, 100
         );

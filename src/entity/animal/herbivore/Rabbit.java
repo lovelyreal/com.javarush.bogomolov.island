@@ -13,6 +13,7 @@ public class Rabbit extends Animal {
         weight = 2D;
         maxCellsByMove = 2;
         killosOfMealToSatisfaction = 0.45;
+        currentKillosOfMeal = killosOfMealToSatisfaction / 2;
         diet = Map.of(
                 Plant.class, 100
         );

@@ -20,4 +20,9 @@ public class Caterpillar extends Animal {
     public String toString() {
         return "\uD83D\uDC1B";
     }
+
+    @Override
+    public boolean isAlive() {
+        return true;
+    }
 }

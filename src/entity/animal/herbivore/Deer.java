@@ -13,6 +13,7 @@ public class Deer extends Animal {
         weight = 300D;
         maxCellsByMove = 4;
         killosOfMealToSatisfaction = 50;
+        currentKillosOfMeal = killosOfMealToSatisfaction / 2;
         diet = Map.of(
                 Plant.class, 100
         );

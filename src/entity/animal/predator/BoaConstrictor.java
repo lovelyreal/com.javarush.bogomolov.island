@@ -16,6 +16,7 @@ public class BoaConstrictor extends Animal {
         weight = 15D;
         maxCellsByMove = 1;
         killosOfMealToSatisfaction = 3;
+        currentKillosOfMeal = killosOfMealToSatisfaction / 2;
         diet = Map.of(
                 Fox.class, 15,
                 Rabbit.class, 20,

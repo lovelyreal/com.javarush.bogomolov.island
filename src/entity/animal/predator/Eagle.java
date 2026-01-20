@@ -15,6 +15,7 @@ public class Eagle extends Animal {
         weight = 6D;
         maxCellsByMove = 3;
         killosOfMealToSatisfaction = 1;
+        currentKillosOfMeal = killosOfMealToSatisfaction / 2;
         diet = Map.of(
                 Fox.class, 10,
                 Rabbit.class, 90,

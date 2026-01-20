@@ -57,15 +57,20 @@ public class AnimalLifeTask implements Runnable {
                         .map(Animal.class::cast)
                         .forEach(u -> processAnimal(u, x, y));
             }
-            locations[x][y].eatingProcess(x,y);
-            locations[x][y].breed(x,y);
+            locations[x][y].eatingProcess(x, y);
+            locations[x][y].breed(x, y);
         } finally {
             locations[x][y].reentrantLock.unlock();
         }
     }
 
     private void processAnimal(Animal animal, int currentX, int currentY) {
-        if(animal.getCurrentKillosOfMeal() >= 1) {
+        if (!animal.isAlive()) {
+            locations[currentX][currentY].getAnimals().get(animal.getClass()).remove(animal);
+
+        }
+        if (animal.getCurrentKillosOfMeal() >= 0) {
+
             if (animal.getMaxCellsByMove() == 0) return;
 
             int oldX = animal.getMapPositionX();
@@ -103,49 +108,49 @@ public class AnimalLifeTask implements Runnable {
         }
     }
 
-        private boolean lockBothLocations ( int x1, int y1, int x2, int y2){
+    private boolean lockBothLocations(int x1, int y1, int x2, int y2) {
 
-            if (x1 < x2 || (x1 == x2 && y1 < y2)) {
+        if (x1 < x2 || (x1 == x2 && y1 < y2)) {
 
-                try {
-                    boolean lock1 = locations[x1][y1].reentrantLock.tryLock(50, TimeUnit.MILLISECONDS);
-                    if (!lock1) return false;
+            try {
+                boolean lock1 = locations[x1][y1].reentrantLock.tryLock(50, TimeUnit.MILLISECONDS);
+                if (!lock1) return false;
 
-                    boolean lock2 = locations[x2][y2].reentrantLock.tryLock(50, TimeUnit.MILLISECONDS);
-                    if (!lock2) {
-                        locations[x1][y1].reentrantLock.unlock();
-                        return false;
-                    }
-                    return true;
-                } catch (InterruptedException e) {
+                boolean lock2 = locations[x2][y2].reentrantLock.tryLock(50, TimeUnit.MILLISECONDS);
+                if (!lock2) {
+                    locations[x1][y1].reentrantLock.unlock();
                     return false;
                 }
-            } else {
-
-                try {
-                    boolean lock2 = locations[x2][y2].reentrantLock.tryLock(50, TimeUnit.MILLISECONDS);
-                    if (!lock2) return false;
-
-                    boolean lock1 = locations[x1][y1].reentrantLock.tryLock(50, TimeUnit.MILLISECONDS);
-                    if (!lock1) {
-                        locations[x2][y2].reentrantLock.unlock();
-                        return false;
-                    }
-                    return true;
-                } catch (InterruptedException e) {
-                    return false;
-                }
+                return true;
+            } catch (InterruptedException e) {
+                return false;
             }
-        }
+        } else {
 
+            try {
+                boolean lock2 = locations[x2][y2].reentrantLock.tryLock(50, TimeUnit.MILLISECONDS);
+                if (!lock2) return false;
 
-        private void unlockBothLocations ( int x1, int y1, int x2, int y2){
-            if (x1 < x2 || (x1 == x2 && y1 < y2)) {
-                locations[x2][y2].reentrantLock.unlock();
-                locations[x1][y1].reentrantLock.unlock();
-            } else {
-                locations[x1][y1].reentrantLock.unlock();
-                locations[x2][y2].reentrantLock.unlock();
+                boolean lock1 = locations[x1][y1].reentrantLock.tryLock(50, TimeUnit.MILLISECONDS);
+                if (!lock1) {
+                    locations[x2][y2].reentrantLock.unlock();
+                    return false;
+                }
+                return true;
+            } catch (InterruptedException e) {
+                return false;
             }
         }
     }
+
+
+    private void unlockBothLocations(int x1, int y1, int x2, int y2) {
+        if (x1 < x2 || (x1 == x2 && y1 < y2)) {
+            locations[x2][y2].reentrantLock.unlock();
+            locations[x1][y1].reentrantLock.unlock();
+        } else {
+            locations[x1][y1].reentrantLock.unlock();
+            locations[x2][y2].reentrantLock.unlock();
+        }
+    }
+}

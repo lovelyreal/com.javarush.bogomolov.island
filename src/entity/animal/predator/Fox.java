@@ -16,6 +16,7 @@ public class Fox extends Animal {
         weight = 8D;
         maxCellsByMove = 1;
         killosOfMealToSatisfaction = 3;
+        currentKillosOfMeal = killosOfMealToSatisfaction / 2;
         diet = Map.of(
                 Caterpillar.class, 40,
                 Rabbit.class, 70,

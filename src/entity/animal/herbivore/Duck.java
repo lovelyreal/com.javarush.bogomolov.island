@@ -13,6 +13,8 @@ public class Duck extends Animal {
         weight = 1D;
         maxCellsByMove = 4;
         killosOfMealToSatisfaction = 0.15;
+        currentKillosOfMeal = killosOfMealToSatisfaction / 2;
+
         diet = Map.of(
                 Plant.class, 100,
                 Caterpillar.class, 90

@@ -16,7 +16,7 @@ public abstract class Animal implements Eatable {
     protected double weight;
     protected Integer maxCellsByMove;
     protected double killosOfMealToSatisfaction;
-    protected double currentKillosOfMeal = killosOfMealToSatisfaction / 2d;
+    protected double currentKillosOfMeal = killosOfMealToSatisfaction;
     protected Map<Class<? extends Eatable>, Integer> diet;
 
     public void setMapPosition(int newX, int newY) {
@@ -73,7 +73,7 @@ public abstract class Animal implements Eatable {
             if (Island.isValidPosition(newX, newY, this.getClass())) {
                 this.mapPositionX = newX;
                 this.mapPositionY = newY;
-                this.currentKillosOfMeal -= 2;
+                currentKillosOfMeal -= killosOfMealToSatisfaction/10d;
             }
         } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
@@ -83,6 +83,7 @@ public abstract class Animal implements Eatable {
             }
         }
     }
+
     public void eat(Eatable meal) {
         if (!(meal instanceof Animal)) return;
         Animal nAnimal = (Animal) meal;
@@ -102,11 +103,11 @@ public abstract class Animal implements Eatable {
         return diet;
     }
 
-    public Class<? extends Eatable> foundMeal(){
+    public Class<? extends Eatable> foundMeal() {
         int count = Randomizer.generateNum(diet.size());
         int i = 0;
         for (Class<? extends Eatable> aClass : diet.keySet()) {
-            if(i == count){
+            if (i == count) {
                 return aClass;
             } else {
                 i++;
@@ -114,6 +115,7 @@ public abstract class Animal implements Eatable {
         }
         return diet.keySet().stream().findFirst().get();
     }
+
     public Integer getMapPositionX() {
         return mapPositionX;
     }
@@ -124,6 +126,10 @@ public abstract class Animal implements Eatable {
 
     public double getWeight() {
         return weight;
+    }
+
+    public boolean isAlive() {
+        return currentKillosOfMeal > 0;
     }
 }
 

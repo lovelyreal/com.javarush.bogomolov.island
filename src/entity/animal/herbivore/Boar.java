@@ -13,6 +13,7 @@ public class Boar extends Animal{
         weight = 400D;
         maxCellsByMove = 2;
         killosOfMealToSatisfaction = 50;
+        currentKillosOfMeal = killosOfMealToSatisfaction / 2;
         diet = Map.of(
                 Plant.class, 100,
                 Caterpillar.class,90,
