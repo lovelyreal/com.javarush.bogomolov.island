@@ -1,0 +1,28 @@
+package service;
+
+public class CellLifeTask implements Runnable {
+
+    private final Island.Location location;
+    private final Island.Location[][] locations;
+    private final int x;
+    private final int y;
+
+    public CellLifeTask(Island island, int x, int y) {
+        this.locations = island.getLocations();
+        this.location = locations[x][y];
+        this.x = x;
+        this.y = y;
+    }
+
+    @Override
+    public void run() {
+        location.reentrantLock.lock();
+        try {
+            location.move(x, y, locations);
+            location.eatingProcess(x, y);
+            location.breed(x, y);
+        } finally {
+            location.reentrantLock.unlock();
+        }
+    }
+}

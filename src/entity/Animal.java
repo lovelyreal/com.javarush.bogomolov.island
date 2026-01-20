@@ -60,28 +60,20 @@ public abstract class Animal implements Eatable {
         if (maxCellsByMove == 0) return;
 
         boolean locked = false;
-        try {
-            locked = reentrantLock.tryLock(100, TimeUnit.MILLISECONDS);
-            if (!locked) return;
+        if (!locked) return;
 
-            int steps = Randomizer.generateNum(maxCellsByMove);
-            Direction direction = Direction.random();
+        int steps = Randomizer.generateNum(maxCellsByMove);
+        Direction direction = Direction.random();
 
-            int newX = mapPositionX + direction.dx * steps;
-            int newY = mapPositionY + direction.dy * steps;
+        int newX = mapPositionX + direction.dx * steps;
+        int newY = mapPositionY + direction.dy * steps;
 
-            if (Island.isValidPosition(newX, newY, this.getClass())) {
-                this.mapPositionX = newX;
-                this.mapPositionY = newY;
-                currentKillosOfMeal -= killosOfMealToSatisfaction/10d;
-            }
-        } catch (InterruptedException _) {
-            Thread.currentThread().interrupt();
-        } finally {
-            if (locked) {
-                reentrantLock.unlock();
-            }
+        if (Island.isValidPosition(newX, newY, this.getClass())) {
+            this.mapPositionX = newX;
+            this.mapPositionY = newY;
+            currentKillosOfMeal -= killosOfMealToSatisfaction / 10d;
         }
+
     }
 
     public void eat(Eatable meal) {

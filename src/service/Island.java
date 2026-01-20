@@ -94,7 +94,7 @@ public class Island {
                                 if (meals == null) {
                                     return;
                                 }
-                                if(meals.size() >1) {
+                                if (meals.size() > 1) {
                                     Eatable victim = meals.remove(0);
                                     hunter.eat(victim);
                                 }
@@ -112,6 +112,68 @@ public class Island {
                 }
             }
         }
+
+        public void move(int x, int y, Island.Location[][] locations) {
+
+            Map<Class<? extends Eatable>, ArrayList<Eatable>> currentMap = this.animals;
+
+            for (Map.Entry<Class<? extends Eatable>, ArrayList<Eatable>> entry : currentMap.entrySet()) {
+                List<Eatable> snapshot = new ArrayList<>(entry.getValue());
+
+                for (Eatable eatable : snapshot) {
+
+                    if (!(eatable instanceof Animal animal)) continue;
+
+                    if (!animal.isAlive()) {
+                        entry.getValue().remove(animal);
+                        continue;
+                    }
+
+                    if (animal.getMaxCellsByMove() == 0) continue;
+
+                    int oldX = animal.getMapPositionX();
+                    int oldY = animal.getMapPositionY();
+
+                    animal.move();
+
+                    int newX = animal.getMapPositionX();
+                    int newY = animal.getMapPositionY();
+
+                    if (oldX == newX && oldY == newY) continue;
+
+                    Island.Location first =
+                            (oldX < newX || (oldX == newX && oldY < newY))
+                                    ? locations[oldX][oldY]
+                                    : locations[newX][newY];
+
+                    Island.Location second =
+                            first == locations[oldX][oldY]
+                                    ? locations[newX][newY]
+                                    : locations[oldX][oldY];
+
+                    if (!first.reentrantLock.tryLock()) continue;
+
+                    try {
+                        if (!second.reentrantLock.tryLock()) continue;
+
+                        try {
+                            entry.getValue().remove(animal);
+
+                            locations[newX][newY].animals
+                                    .computeIfAbsent(animal.getClass(), k -> new ArrayList<>())
+                                    .add(animal);
+
+                        } finally {
+                            second.reentrantLock.unlock();
+                        }
+
+                    } finally {
+                        first.reentrantLock.unlock();
+                    }
+                }
+            }
+        }
+
     }
 
     public void createNewIsland() {
