@@ -113,66 +113,68 @@ public class Island {
             }
         }
 
-        public void move(int x, int y, Island.Location[][] locations) {
+        public void move(int x, int y, Location[][] locations) {
 
-            Map<Class<? extends Eatable>, ArrayList<Eatable>> currentMap = this.animals;
+            Map<Class<? extends Eatable>, ArrayList<Eatable>> map = getAnimals();
 
-            for (Map.Entry<Class<? extends Eatable>, ArrayList<Eatable>> entry : currentMap.entrySet()) {
+            for (var entry : map.entrySet()) {
+
                 List<Eatable> snapshot = new ArrayList<>(entry.getValue());
 
-                for (Eatable eatable : snapshot) {
+                for (Eatable e : snapshot) {
 
-                    if (!(eatable instanceof Animal animal)) continue;
-
-                    if (!animal.isAlive()) {
-                        entry.getValue().remove(animal);
-                        continue;
-                    }
-
+                    if (!(e instanceof Animal animal)) continue;
+                    if (!animal.isAlive()) continue;
                     if (animal.getMaxCellsByMove() == 0) continue;
 
                     int oldX = animal.getMapPositionX();
                     int oldY = animal.getMapPositionY();
 
-                    animal.move();
+                    animal.move(); // меняет координаты внутри Animal
 
                     int newX = animal.getMapPositionX();
                     int newY = animal.getMapPositionY();
 
                     if (oldX == newX && oldY == newY) continue;
 
-                    Island.Location first =
-                            (oldX < newX || (oldX == newX && oldY < newY))
-                                    ? locations[oldX][oldY]
-                                    : locations[newX][newY];
+                    if (!Island.isValidPosition(newX, newY, animal.getClass())) {
+                        animal.setMapPosition(oldX, oldY);
+                        continue;
+                    }
 
-                    Island.Location second =
-                            first == locations[oldX][oldY]
-                                    ? locations[newX][newY]
-                                    : locations[oldX][oldY];
+                    Location from = locations[oldX][oldY];
+                    Location to   = locations[newX][newY];
 
-                    if (!first.reentrantLock.tryLock()) continue;
+                    if (!lockBoth(from, to)) {
+                        animal.setMapPosition(oldX, oldY);
+                        continue;
+                    }
 
                     try {
-                        if (!second.reentrantLock.tryLock()) continue;
-
-                        try {
-                            entry.getValue().remove(animal);
-
-                            locations[newX][newY].animals
-                                    .computeIfAbsent(animal.getClass(), k -> new ArrayList<>())
-                                    .add(animal);
-
-                        } finally {
-                            second.reentrantLock.unlock();
-                        }
-
+                        from.getAnimals().get(animal.getClass()).remove(animal);
+                        to.getAnimals()
+                                .computeIfAbsent(animal.getClass(), k -> new ArrayList<>())
+                                .add(animal);
                     } finally {
-                        first.reentrantLock.unlock();
+                        unlockBoth(from, to);
                     }
                 }
             }
         }
+        private boolean lockBoth(Location a, Location b) {
+            Location first = System.identityHashCode(a) < System.identityHashCode(b) ? a : b;
+            Location second = first == a ? b : a;
+
+            first.reentrantLock.lock();
+            second.reentrantLock.lock();
+            return true;
+        }
+
+        private void unlockBoth(Location a, Location b) {
+            a.reentrantLock.unlock();
+            b.reentrantLock.unlock();
+        }
+
 
     }
 
