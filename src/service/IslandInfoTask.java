@@ -13,10 +13,11 @@ import java.util.concurrent.TimeUnit;
 
 public class IslandInfoTask implements Runnable {
     private final Map<Class<? extends Eatable>, Integer> animalCount = new ConcurrentHashMap<>();
-    private Integer islandDay = 0;
+    private Integer islandDay;
     private final Island.Location[][] locations;
-    public IslandInfoTask(Island island) {
+    public IslandInfoTask(Island island, Integer day) {
         locations = island.getLocations();
+        islandDay = day;
     }
 
     @Override
