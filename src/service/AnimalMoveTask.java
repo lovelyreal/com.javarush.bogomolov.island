@@ -2,8 +2,6 @@ package service;
 
 import entity.Animal;
 import entity.Eatable;
-import entity.animal.predator.Wolf;
-import util.AnimalFactory;
 import util.Settings;
 
 import java.util.ArrayList;
@@ -13,12 +11,12 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 
-public class AnimalLifeTask implements Runnable {
+public class AnimalMoveTask implements Runnable {
     private final Island.Location[][] locations;
     private final int MAP_SIZE_X = Settings.MAP_SIZE_X;
     private final int MAP_SIZE_Y = Settings.MAP_SIZE_Y;
 
-    public AnimalLifeTask(Island island) {
+    public AnimalMoveTask(Island island) {
         locations = island.getLocations();
     }
 
@@ -33,7 +31,7 @@ public class AnimalLifeTask implements Runnable {
                 }
             }
         } catch (Throwable t) {
-            System.err.println("💥 КРИТИЧЕСКАЯ ОШИБКА В AnimalLifeTask");
+            System.err.println("💥 КРИТИЧЕСКАЯ ОШИБКА В AnimalMoveTask");
             t.printStackTrace();
         }
     }
@@ -58,7 +56,6 @@ public class AnimalLifeTask implements Runnable {
                         .forEach(u -> processAnimal(u, x, y));
             }
             locations[x][y].eatingProcess(x, y);
-            locations[x][y].breed(x, y);
         } finally {
             locations[x][y].reentrantLock.unlock();
         }
@@ -100,6 +97,7 @@ public class AnimalLifeTask implements Runnable {
                 locations[newX][newY].getAnimals()
                         .computeIfAbsent(animal.getClass(), k -> new ArrayList<>())
                         .add(animal);
+                //System.out.println(animal.getClass().getSimpleName() +" переместилось в " + newX + " " + newY);
 
             } finally {
                 unlockBothLocations(oldX, oldY, newX, newY);
