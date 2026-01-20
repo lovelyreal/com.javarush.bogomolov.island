@@ -2,10 +2,7 @@
 import service.*;
 import util.Settings;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 
 public class StartMenu {
@@ -15,13 +12,11 @@ public class StartMenu {
         System.out.println("/".repeat(100));
         ScheduledThreadPoolExecutor executorService = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors());
         ScheduledExecutorService infoExecutorService = Executors.newSingleThreadScheduledExecutor();
+        ExecutorService testExecutorService = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
 
         for (int x = 0; x < Settings.MAP_SIZE_X; x++) {
             for (int y = 0; y < Settings.MAP_SIZE_Y; y++) {
-                executorService.scheduleAtFixedRate(
-                        new CellLifeTask(myIsland, x, y),
-                        0, 2, TimeUnit.SECONDS
-                );
+                testExecutorService.submit(new CellLifeTask(myIsland, x, y));
             }
         }
         infoExecutorService.scheduleAtFixedRate(new IslandInfoTask(myIsland), 0, 2, TimeUnit.SECONDS);
