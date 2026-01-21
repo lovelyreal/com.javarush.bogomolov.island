@@ -3,14 +3,13 @@ package entity;
 import util.*;
 import service.Island;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class Animal implements Eatable {
     protected static int maxAmountInOneCell;
-
-    protected ReentrantLock reentrantLock = new ReentrantLock(true);
     protected Integer mapPositionX;
     protected Integer mapPositionY;
     protected double weight;
@@ -56,24 +55,39 @@ public abstract class Animal implements Eatable {
     }
 
 
-    public void move() {
-        if (maxCellsByMove == 0) return;
+    public void move(Island island, Island.Location location) {
+        Direction result = Direction.random();
+        if (result == null) return;
 
-        boolean locked = false;
-        if (!locked) return;
+        int newX = result.dx;
+        int newY = result.dy;
 
-        int steps = Randomizer.generateNum(maxCellsByMove);
-        Direction direction = Direction.random();
+        if (!Island.isValidPosition(newX, newY, this.getClass(), location)){ return;}
 
-        int newX = mapPositionX + direction.dx * steps;
-        int newY = mapPositionY + direction.dy * steps;
+        Island.Location target = island.getLocations()[newX][newY];
 
-        if (Island.isValidPosition(newX, newY, this.getClass())) {
-            this.mapPositionX = newX;
-            this.mapPositionY = newY;
-            currentKillosOfMeal -= killosOfMealToSatisfaction / 10d;
+        Island.Location first = location;
+        Island.Location second = target;
+
+        if (System.identityHashCode(first) > System.identityHashCode(second)) {
+            first = target;
+            second = location;
         }
 
+        first.reentrantLock.lock();
+        second.reentrantLock.lock();
+        try {
+            location.getAnimals().get(this.getClass()).remove(this);
+            target.getAnimals()
+                    .computeIfAbsent(this.getClass(), k -> new ArrayList<>())
+                    .add(this);
+
+            this.setMapPosition(newX, newY);
+        } finally {
+            second.reentrantLock.unlock();
+            first.reentrantLock.unlock();
+
+        }
     }
 
     public void eat(Eatable meal) {
@@ -123,5 +137,6 @@ public abstract class Animal implements Eatable {
     public boolean isAlive() {
         return currentKillosOfMeal > 0;
     }
+
 }
 

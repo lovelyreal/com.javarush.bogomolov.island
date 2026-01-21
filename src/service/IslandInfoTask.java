@@ -34,7 +34,7 @@ public class IslandInfoTask implements Runnable {
 
                 boolean locked = false;
                 try {
-                    locked = locations[i][j].reentrantLock.tryLock(100, TimeUnit.MILLISECONDS);
+                    locked = locations[i][j].reentrantLock.tryLock();
                     if (locked) {
                         for (Class<? extends Eatable> aClass : locations[i][j].getAnimals().keySet()) {
                             Integer i1 = animalCount.get(aClass);
@@ -43,10 +43,6 @@ public class IslandInfoTask implements Runnable {
                         }
 
                     }
-                } catch (InterruptedException e) {
-                    System.out.println("Процесс сбора статистики прервали!!!");
-                    Thread.currentThread().interrupt(); // Восстанавливаем флаг прерывания
-                    return;
                 } finally {
                     if (locked) {
                         locations[i][j].reentrantLock.unlock();

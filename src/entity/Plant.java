@@ -6,9 +6,6 @@ public class Plant implements Eatable {
     public static int maxAmountInOneCell = 200;
 
     public Plant(int x, int y) {
-        this.x = x;
-        this.y = y;
-
     }
 
     @Override

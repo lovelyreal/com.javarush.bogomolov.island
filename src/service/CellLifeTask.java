@@ -22,12 +22,18 @@ public class CellLifeTask implements Runnable {
     public void run() {
         location.reentrantLock.lock();
         try {
-            location.move(x, y, locations);
+            busy();
+            //location.move(x, y, locations);
             location.eatingProcess(x, y);
             location.breed(x, y);
         } finally {
             location.reentrantLock.unlock();
             latch.countDown();
+        }
+    }
+    private void busy(){
+        for (int i = 0; i < 5000; i++) {
+            Math.sqrt(i);
         }
     }
 }

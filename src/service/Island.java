@@ -9,12 +9,26 @@ import util.Settings;
 
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Island {
     Random rand = new Random();
     private static Location[][] locations = new Location[Settings.MAP_SIZE_X][Settings.MAP_SIZE_Y];
+    private static Island support = new Island();
+    private static Island instance;
+
+    public static void initialize() {
+        if (instance == null)
+            instance = support.createNewIsland();
+        else
+            throw new IllegalStateException("Island already initialized.");
+    }
+
+    public static synchronized Island getInstance() {
+        if (instance == null)
+            throw new IllegalStateException("Island not initialized.");
+        else return instance;
+    }
 
 
     public class Location {
@@ -75,9 +89,9 @@ public class Island {
 
 
         public void eatingProcess(int x, int y) {
-            boolean locked = false;
+
             try {
-                locked = reentrantLock.tryLock(100, TimeUnit.MILLISECONDS);
+                if (!reentrantLock.tryLock()) return;
                 for (Class<? extends Eatable> aClass : animals.keySet()) {
                     if (aClass != Plant.class) {
 
@@ -104,112 +118,60 @@ public class Island {
                         }
                     }
                 }
-            } catch (InterruptedException e) {
-                System.out.println("Поток прервали на этапе кормешки!");
             } finally {
-                if (locked) {
                     reentrantLock.unlock();
-                }
             }
         }
 
-        public void move(int x, int y, Location[][] locations) {
-
-            Map<Class<? extends Eatable>, ArrayList<Eatable>> map = getAnimals();
-
-            for (var entry : map.entrySet()) {
-
-                List<Eatable> snapshot = new ArrayList<>(entry.getValue());
-
-                for (Eatable e : snapshot) {
-
-                    if (!(e instanceof Animal animal)) continue;
-                    if (!animal.isAlive()) continue;
-                    if (animal.getMaxCellsByMove() == 0) continue;
-
-                    int oldX = animal.getMapPositionX();
-                    int oldY = animal.getMapPositionY();
-
-                    animal.move(); // меняет координаты внутри Animal
-
-                    int newX = animal.getMapPositionX();
-                    int newY = animal.getMapPositionY();
-
-                    if (oldX == newX && oldY == newY) continue;
-
-                    if (!Island.isValidPosition(newX, newY, animal.getClass())) {
-                        animal.setMapPosition(oldX, oldY);
-                        continue;
-                    }
-
-                    Location from = locations[oldX][oldY];
-                    Location to   = locations[newX][newY];
-
-                    if (!lockBoth(from, to)) {
-                        animal.setMapPosition(oldX, oldY);
-                        continue;
-                    }
-
-                    try {
-                        from.getAnimals().get(animal.getClass()).remove(animal);
-                        to.getAnimals()
-                                .computeIfAbsent(animal.getClass(), k -> new ArrayList<>())
-                                .add(animal);
-                    } finally {
-                        unlockBoth(from, to);
-                    }
-                }
+        public boolean addCreature(Eatable eatable) {
+            if (eatable instanceof Plant plant) {
+                animals.get(Plant.class).add(new Plant(999, 999));
+                return true;
+            } else if (eatable instanceof Animal animal) {
+                animals.get(eatable.getClass()).add(eatable);
+                return true;
             }
-        }
-        private boolean lockBoth(Location a, Location b) {
-            Location first = System.identityHashCode(a) < System.identityHashCode(b) ? a : b;
-            Location second = first == a ? b : a;
-
-            first.reentrantLock.lock();
-            second.reentrantLock.lock();
-            return true;
+            return false;
         }
 
-        private void unlockBoth(Location a, Location b) {
-            a.reentrantLock.unlock();
-            b.reentrantLock.unlock();
+        public void removeCreature(Eatable eatable) {
+            animals.get(eatable.getClass()).remove(eatable);
         }
-
-
     }
 
-    public void createNewIsland() {
+    public Island createNewIsland() {
+        Island newIsland = new Island();
         for (int i = 0; i < Settings.MAP_SIZE_X; i++) {
             for (int j = 0; j < Settings.MAP_SIZE_Y; j++) {
-                locations[i][j] = new Location();
+                newIsland.getLocations()[i][j] = new Location();
                 try {
-                    locations[i][j].generateAnimals(i, j);
+                    newIsland.getLocations()[i][j].generateAnimals(i, j);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
+        return newIsland;
     }
 
     public Location[][] getLocations() {
         return locations;
     }
 
-    public static boolean isValidPosition(int newX, int newY, Class<? extends Eatable> animal) {
+    public static boolean isValidPosition(int newX, int newY, Class<? extends Eatable> animal,Location loc
+    ) {
         if (newX < 0 || newX >= Settings.MAP_SIZE_X ||
                 newY < 0 || newY >= Settings.MAP_SIZE_Y) {
             return false;
         }
-        Location loc = locations[newX][newY];
-        loc.reentrantLock.lock();
+
+        int count = loc.getAnimals().get(animal).size();
+        int max;
         try {
-            int count = loc.animals.get(animal).size();
-            int max = animal.getDeclaredField("maxAmountInOneCell").getInt(null);
-            return count < max;
+            max = animal.getDeclaredField("maxAmountInOneCell").getInt(null);
         } catch (Exception e) {
             return false;
-        } finally {
-            loc.reentrantLock.unlock();
         }
+        return count < max;
     }
 }
