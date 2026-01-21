@@ -24,8 +24,8 @@ public class CellLifeTask implements Runnable {
         try {
             busy();
             //location.move(x, y, locations);
-            location.eatingProcess(x, y);
-            location.breed(x, y);
+            //location.eatingProcess(x, y);
+            //location.breed();
         } finally {
             location.reentrantLock.unlock();
             latch.countDown();

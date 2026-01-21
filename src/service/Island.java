@@ -3,6 +3,7 @@ package service;
 import entity.Animal;
 import entity.Eatable;
 import entity.Plant;
+import entity.animal.herbivore.Caterpillar;
 import util.AnimalFactory;
 import util.Randomizer;
 import util.Settings;
@@ -55,11 +56,9 @@ public class Island {
             return animals;
         }
 
-        public void breed(int x, int y) {
-            reentrantLock.lock();
-            try {
+        public void breed() {
                 for (Class<? extends Eatable> species : animals.keySet()) {
-                    if (species != Plant.class) {
+                    if (species != Plant.class && species != Caterpillar.class) {
                         List<Eatable> list = animals.get(species);
                         if (list == null || list.size() < 2) continue;
                         int current = list.size();
@@ -71,72 +70,42 @@ public class Island {
                         } catch (Exception e) {
                             continue;
                         }
-                        int newborns = current / 4;
+                        int newborns = current / 2;
                         int availableSpace = max - current;
 
                         int toCreate = Math.min(newborns, availableSpace);
 
                         for (int i = 0; i < toCreate; i++) {
-                            Eatable baby = AnimalFactory.createNewAnimal(x, y, species);
+                            Eatable baby = AnimalFactory.createNewAnimal(999,999,species);
                             list.add(baby);
                         }
                     }
                 }
-            } finally {
-                reentrantLock.unlock();
-            }
         }
+        public void eatingProccess() {
+            for (Class<? extends Eatable> species : animals.keySet()) {
+                List<Eatable> spec = new ArrayList<>(animals.get(species));
+                for (Eatable eatable : spec) {
+                    if(eatable instanceof Animal animal) {
+                        if (animal.getCurrentKillosOfMeal() < animal.getKillosOfMealToSatisfaction()) {
+                            //System.out.println("!!!!!!!!!!!!!!!!!!!!");
+                            for (Class<? extends Eatable> aClass : animal.getDiet().keySet()) {
+                                ArrayList<Eatable> eatables = new ArrayList<>(animals.get(aClass));
+                                for (Eatable eatable1 : eatables) {
+                                    if (Randomizer.generateNum(100) > animal.getDiet().get(aClass)) {
+                                        animal.eat(eatable1);
+                                        animals.get(aClass).remove(eatable1);
 
-
-        public void eatingProcess(int x, int y) {
-
-            try {
-                if (!reentrantLock.tryLock()) return;
-                for (Class<? extends Eatable> aClass : animals.keySet()) {
-                    if (aClass != Plant.class) {
-
-                        List<Eatable> eatables = animals.get(aClass);
-                        List<Animal> hunters = eatables.stream()
-                                .filter(Animal.class::isInstance)
-                                .map(Animal.class::cast)
-                                .toList();
-                        for (Animal hunter : hunters) {
-                            Class<? extends Eatable> huntersMeal = hunter.foundMeal();
-                            int percentOfSuccess = Randomizer.generateNum(100);
-                            if (percentOfSuccess < hunter.getDiet().get(huntersMeal)) {
-                                List<Eatable> meals = animals.get(huntersMeal);
-                                if (meals == null) {
-                                    return;
+                                    }
                                 }
-                                if (meals.size() > 1) {
-                                    Eatable victim = meals.remove(0);
-                                    hunter.eat(victim);
-                                }
+
                             }
-
-
                         }
                     }
                 }
-            } finally {
-                    reentrantLock.unlock();
             }
         }
 
-        public boolean addCreature(Eatable eatable) {
-            if (eatable instanceof Plant plant) {
-                animals.get(Plant.class).add(new Plant(999, 999));
-                return true;
-            } else if (eatable instanceof Animal animal) {
-                animals.get(eatable.getClass()).add(eatable);
-                return true;
-            }
-            return false;
-        }
-
-        public void removeCreature(Eatable eatable) {
-            animals.get(eatable.getClass()).remove(eatable);
-        }
     }
 
     public Island createNewIsland() {
@@ -158,20 +127,18 @@ public class Island {
         return locations;
     }
 
-    public static boolean isValidPosition(int newX, int newY, Class<? extends Eatable> animal,Location loc
+    public static boolean isValidPositionUnsafe(
+            Island.Location loc,
+            Class<? extends Eatable> animalClass
     ) {
-        if (newX < 0 || newX >= Settings.MAP_SIZE_X ||
-                newY < 0 || newY >= Settings.MAP_SIZE_Y) {
-            return false;
-        }
-
-        int count = loc.getAnimals().get(animal).size();
-        int max;
         try {
-            max = animal.getDeclaredField("maxAmountInOneCell").getInt(null);
+            int count = loc.getAnimals().get(animalClass).size();
+            int max = animalClass
+                    .getDeclaredField("maxAmountInOneCell")
+                    .getInt(null);
+            return count < max;
         } catch (Exception e) {
             return false;
         }
-        return count < max;
     }
 }

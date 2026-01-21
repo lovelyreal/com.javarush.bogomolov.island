@@ -4,6 +4,7 @@ import util.*;
 import service.Island;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -55,50 +56,69 @@ public abstract class Animal implements Eatable {
     }
 
 
-    public void move(Island island, Island.Location location) {
-        Direction result = Direction.random();
-        if (result == null) return;
+    public void move(Island island, Island.Location current) {
 
-        int newX = result.dx;
-        int newY = result.dy;
+        Direction dir = Direction.random();
+        if (dir == null) return;
 
-        if (!Island.isValidPosition(newX, newY, this.getClass(), location)){ return;}
+        int newX = mapPositionX + dir.dx;
+        int newY = mapPositionY + dir.dy;
 
-        Island.Location target = island.getLocations()[newX][newY];
-
-        Island.Location first = location;
-        Island.Location second = target;
-
-        if (System.identityHashCode(first) > System.identityHashCode(second)) {
-            first = target;
-            second = location;
+        if (newX < 0 || newX >= Settings.MAP_SIZE_X ||
+        newY < 0 || newY >= Settings.MAP_SIZE_Y) {
+            return;
         }
 
-        first.reentrantLock.lock();
-        second.reentrantLock.lock();
+        Island.Location target = island.getLocations()[newX][newY];
+        if (target == current) return;
+
+        Island.Location first;
+        Island.Location second;
+
+        if (System.identityHashCode(current) < System.identityHashCode(target)) {
+            first = current;
+            second = target;
+        } else {
+            first = target;
+            second = current;
+        }
+
+        boolean firstLocked = false;
+        boolean secondLocked = false;
+
         try {
-            location.getAnimals().get(this.getClass()).remove(this);
+            firstLocked = first.reentrantLock.tryLock(50, TimeUnit.MILLISECONDS);
+            if (!firstLocked) return;
+
+            secondLocked = second.reentrantLock.tryLock(50, TimeUnit.MILLISECONDS);
+            if (!secondLocked) return;
+
+            // 🔥 ВСЕ ПРОВЕРКИ ТОЛЬКО ЗДЕСЬ
+            if (!Island.isValidPositionUnsafe(target, this.getClass())) {
+                return;
+            }
+
+            current.getAnimals().get(this.getClass()).remove(this);
             target.getAnimals()
                     .computeIfAbsent(this.getClass(), k -> new ArrayList<>())
                     .add(this);
 
             this.setMapPosition(newX, newY);
-        } finally {
-            second.reentrantLock.unlock();
-            first.reentrantLock.unlock();
+            this.currentKillosOfMeal *= 0.9;
 
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            if (secondLocked) second.reentrantLock.unlock();
+            if (firstLocked) first.reentrantLock.unlock();
         }
     }
 
-    public void eat(Eatable meal) {
-        if (!(meal instanceof Animal)) return;
-        Animal nAnimal = (Animal) meal;
-        double mealWeight = nAnimal.getWeight();
-
-        currentKillosOfMeal = Math.min(
-                killosOfMealToSatisfaction,
-                currentKillosOfMeal + mealWeight
-        );
+    public void eat(Eatable eatable) {
+        if (eatable != null) {
+            Animal m = (Animal) eatable;
+            currentKillosOfMeal += m.weight;
+        }
     }
 
     public double getCurrentKillosOfMeal() {
@@ -138,5 +158,8 @@ public abstract class Animal implements Eatable {
         return currentKillosOfMeal > 0;
     }
 
+    public double getKillosOfMealToSatisfaction() {
+        return killosOfMealToSatisfaction;
+    }
 }
 
