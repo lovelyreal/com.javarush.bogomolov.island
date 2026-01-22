@@ -115,9 +115,8 @@ public abstract class Animal implements Eatable {
     }
 
     public void eat(Eatable eatable) {
-        if (eatable != null) {
-            Animal m = (Animal) eatable;
-            currentKillosOfMeal += m.weight;
+        if (eatable instanceof Animal animal) {
+            currentKillosOfMeal += animal.weight;
         }
     }
 

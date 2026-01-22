@@ -12,11 +12,10 @@ public class SimulationWorker {
 
 
     private void tick() {
+        workers.scheduleAtFixedRate(new PlantGrowTask(), 0, 2, TimeUnit.SECONDS);
         info.scheduleAtFixedRate(new IslandInfoTask(myIsland, 0) , 0, 2, TimeUnit.SECONDS);
-
-
+        info.scheduleAtFixedRate(new CaterpillarGrowTask() , 0, 2, TimeUnit.SECONDS);
         Island.Location[][] locations = myIsland.getLocations();
-
         for (Island.Location[] row : locations) {
             for (Island.Location loc : row) {
                 workers.scheduleAtFixedRate(new AnimalLifeTask(loc, myIsland) , 1, 2, TimeUnit.SECONDS);

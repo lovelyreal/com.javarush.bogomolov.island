@@ -56,7 +56,7 @@ public class Island {
             return animals;
         }
 
-        public void breed() {
+        public synchronized void breed() {
                 for (Class<? extends Eatable> species : animals.keySet()) {
                     if (species != Plant.class && species != Caterpillar.class) {
                         List<Eatable> list = animals.get(species);
@@ -82,17 +82,16 @@ public class Island {
                     }
                 }
         }
-        public void eatingProccess() {
+        public synchronized void eatingProccess() {
             for (Class<? extends Eatable> species : animals.keySet()) {
                 List<Eatable> spec = new ArrayList<>(animals.get(species));
                 for (Eatable eatable : spec) {
                     if(eatable instanceof Animal animal) {
-                        if (animal.getCurrentKillosOfMeal() < animal.getKillosOfMealToSatisfaction()) {
-                            //System.out.println("!!!!!!!!!!!!!!!!!!!!");
+                        if (animal.getCurrentKillosOfMeal() <= animal.getKillosOfMealToSatisfaction()) {
                             for (Class<? extends Eatable> aClass : animal.getDiet().keySet()) {
                                 ArrayList<Eatable> eatables = new ArrayList<>(animals.get(aClass));
                                 for (Eatable eatable1 : eatables) {
-                                    if (Randomizer.generateNum(100) > animal.getDiet().get(aClass)) {
+                                    if (Randomizer.generateNum(100) < animal.getDiet().get(aClass) - 10) {
                                         animal.eat(eatable1);
                                         animals.get(aClass).remove(eatable1);
 
@@ -102,6 +101,7 @@ public class Island {
                             }
                         }
                     }
+
                 }
             }
         }
